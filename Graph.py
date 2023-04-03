@@ -55,10 +55,9 @@ class Graph:
 
     def __str__(self) -> str:
         lst = list()
-        for nodename, node in self.nodes.items():
+        for node in self.nodes.values():
             lst.append(str(node))
 
         return str("\n".join(lst))
-
 
 

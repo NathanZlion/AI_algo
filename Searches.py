@@ -1,5 +1,5 @@
 
-from Romania import Romania as romania
+from Romania import Romania
 from queue import Queue
 import heapq
 
@@ -199,6 +199,6 @@ def bidirectional_search(graph, start, goal):
     return None
 
 
-rom = romania().getCity()
+rom = Romania().getCity()
 
-print(bfs(rom, "Zerind", "Craiova"))
+print(ucs(rom, "Zerind", "Eforie"))
