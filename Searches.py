@@ -33,36 +33,6 @@ def bfs(graph, start, goal):
 
 
 
-
-def bfs(graph, start, goal):
-    explored = set()
-    queue = Queue()
-    queue.put([start])
-
-    if start == goal:
-        return [start]
-
-    while not queue.empty():
-        path = queue.get()
-        node = path[-1]
-
-        if node not in explored:
-            neighbors = graph.search(node).get_neighbors()
-
-            for neighbor in neighbors:
-                new_path = list(path)
-                new_path.append(neighbor.name)
-                queue.put(new_path)
-
-                if neighbor.name == goal:
-                    return new_path
-
-            explored.add(node)
-
-    return None
-
-
-
 def dfs(graph, start, goal):
     explored = set()
     stack = [start]
@@ -199,6 +169,6 @@ def bidirectional_search(graph, start, goal):
     return None
 
 
-rom = Romania().getCity()
+romania = Romania().getCity()
 
-print(ucs(rom, "Zerind", "Eforie"))
+print(bidirectional_search(romania, "Zerind", "Eforie"))
