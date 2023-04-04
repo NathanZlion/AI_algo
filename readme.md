@@ -1,59 +1,71 @@
+# Introduction to AI - Assignment I
 
+This repository contains code for the first assignment of the Introduction to AI course at Addis Ababa University. The objectives of the assignment include becoming comfortable with graphs and their operations, being able to implement graph search algorithms, benchmarking and comparing different search algorithms, and analyzing the results to deduce important findings.
 
-## Introduction to AI - Assignment I
+## Table of Contents
 
-School of Information Technology & Engineering | Addis Ababa University
-- Objectives of the assignment (30 points):
-    - Be comfortable with graphs and their operations
-    - Being able to implement graph search algorithms
-    - Benchmark and compare different search algorithms
-    -  Analyze the results and deduce important findings
+- [Graph Library](#graph-library)
+- [Graph Search Algorithms](#graph-search-algorithms)
+- [Centrality Indicators](#centrality-indicators)
+- [Deliverables](#deliverables)
 
-* Make sure to write reusable code so that you don’t write the same algorithm multiple times
-* You can use jupyter-notebook to write your algorithms
-* Use matplot.pyplot library to plot the analysis
+## Graph Library
 
+The `graph_library` directory contains the implementation of a graph library with the following functionalities:
 
-1. Develop a graph library. It should have the following functionalities
-    1. Create a node
-    2. Insert and delete edges and nodes
-    3. Search for an item in a graph
-    4. Using your self-made graph library, try loading the graph data presented on page 83rd of the textbook. The file containing the cities will be given to you. 
+- Create a node
+- Insert and delete edges and nodes
+- Search for an item in a graph
 
+The graph data presented on page 83 of the textbook is loaded using this self-made graph library.
 
-<img src=".\romania_city.png" alt=""></img>
+## Graph Search Algorithms
 
-2. Implement `BFS`, DFS, UCS, `Iterative Deepening`, `Bidirectional Search`, `Greedy`, and A* Search algorithms. Using the graph from Question 2, evaluate each of your algorithms and benchmark them.
+The `graph_search_algorithms` directory contains implementations of the following search algorithms:
 
-    - The benchmark should be finding the path between each node. Randomly pick 10 cities. Find the path between them.
+- Breadth-First Search (BFS)
+- Depth-First Search (DFS)
+- Uniform-Cost Search (UCS)
+- Iterative Deepening Search
+- Bidirectional Search
+- Greedy Search
+- A* Search
 
-    - For each algorithm
-        1. What is the average time taken for each path search?
-        2. What is the solution length?
+Using the graph from the `graph_library`, each algorithm is evaluated and benchmarked by finding the path between 10 randomly selected cities. Each experiment is run 10 times and the average time taken for each path search and the solution length are recorded. 
 
-    - Each experiment should be run 10 times
+In addition, 16 random graphs with a number of nodes `n` = 10, 20, 30, 40 are created by randomly connecting nodes with the probability of edges `p` = 0.2, 0.4, 0.6, 0.8. For each graph setting, five nodes are randomly selected and the above search algorithms are used to find the paths between them. Each experiment is run 5 times and the average time taken in the five experiments is recorded. The average time and solution length on each graph size are plotted using `matplotlib.pyplot`.
 
-    - Create random graphs with a number of nodes n = 10, 20, 30, 40.  Randomly connect nodes with the probability of edges p = 0.2, 0.4, 0.6, 0.8. In total, you will have 16 graphs. 
+## Centrality Indicators
 
-        1. Randomly select five nodes and apply the above algorithms to find paths between them in all 16 graph settings. 
-        2. Register the time taken to find a solution for each algorithm and graph. Run each experiment 5 times and have the average of the time taken in the five experiments.
-        3. Use matplotlib.pyplot to plot their average time and solution length on each graph sizes
+The `centrality_indicators` directory contains implementations of the following centrality indicators:
 
-3. In graph theory and network analysis, indicators of centrality assign numbers or rankings to nodes within a graph corresponding to their network position. For example, in a given social network, questions like who is an influencer? Who is the significant person? Who is the linkage between societies/groups? can easily be answered by calculating node centrality rankings.
+- Degree Centrality
+- Closeness Centrality
+- Eigenvector Centrality
+- Katz Centrality
+- PageRank Centrality
+- Betweenness Centrality
 
-    There are several centralities types. Compute the Degree, Closeness, Eigenvector, Katz, PageRank, and Betweenness centralities on the graph from Question 2. (You have to read online how to calculate these centralities). 
+These centralities are computed for each node in the graph from the `graph_library`. The top-ranked cities in each centrality category are reported in a table and observations are summarized.
 
-        1. Compute these centralities for each node
-        2. Report a table containing top-ranked cities in each centrality category
-        3. Summerise your observations
+## Deliverables
 
-Deliverable: 
-* A PDF file showing the results of your experiments and your detailed observations. Include tables, graphs, and plots highlighting the results. In your analysis, compare the results and explain why you saw the differences and the similarities. 
-* Code organized with proper naming
-* Have a readme.txt file you list the ids of the group members	
-* Zip the code, the PDF file, and the readme.txt file in one folder and name it Group-x, where x is your group id.  
+The deliverables for this assignment include:
 
-Don’t write definitions. Just the results.
+- A PDF file showing the results of the experiments and detailed observations, including tables, graphs, and plots highlighting the results.
+- Organized code with proper naming.
+- A `readme.txt` file listing the IDs of the group members.
+- A zip file containing the code, the PDF file, and the `readme.txt` file, named `Group-x`, where `x` is the group ID.
 
-How to submit it?
-Submit it on Google Classroom. The deadline is April 8, midnight. 
+Note: Definitions are excluded from the deliverables.
+
+## How to Run the Code
+
+- Clone this repository using `git clone https://github.com/NathanZlion/AI_algo.git`
+- Navigate to the desired directory using `cd directory_name`
+- Install the required libraries using `pip install -r requirements.txt`
+- Run the desired script using `python script_name.py`
+
+## Author
+
+- Nathnael Dereje
