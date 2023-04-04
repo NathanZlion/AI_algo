@@ -1,5 +1,5 @@
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 class Node:
@@ -10,14 +10,16 @@ class Node:
     def add_neighbor(self, neighbor, weight = 0):
         self.neighbors[neighbor] = weight
 
-    def get_neighbors(self):
-        return self.neighbors.keys()
+    def get_neighbors(self) -> Optional[List['Node']]:
+        return list(self.neighbors.keys())
 
     def get_weight(self, neighbor):
-        return self.neighbors[neighbor]
+        try:
+            return self.neighbors[neighbor]
+        except:
+            print("cannot find neighbor", neighbor, "for city ", self.name)
 
     def __str__(self) -> str:
-        # return self.name
         return self.name + " >>> "  + str([neighbor.name for neighbor in self.neighbors.keys()])
 
 class Graph:
@@ -26,6 +28,12 @@ class Graph:
 
     def add_node(self, node):
         self.nodes[node.name] = node
+    
+    def get_cost(self, node1: Node, node2: Node):
+        try:
+            return self.nodes[node1].get_weight(self.nodes[node2])
+        except:
+            return float('inf')
 
     def add_edge(self, node1, node2, weight=0):
         if node1 not in self.nodes:
@@ -47,7 +55,7 @@ class Graph:
             del self.nodes[node1].neighbors[self.nodes[node2]]
             del self.nodes[node2].neighbors[self.nodes[node1]]
 
-    def search(self, item):
+    def search(self, item) -> Optional[Node]:
         try:
             return self.nodes[item]
         except KeyError:
