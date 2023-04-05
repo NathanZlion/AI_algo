@@ -2,39 +2,19 @@
 from Graph import Graph, Node
 
 
-
 class Romania:
     def __init__(self):
         self.romania = Graph()
 
-        self.romania.add_node(Node("Oradea"))
-        self.romania.add_node(Node("Zerind"))
-        self.romania.add_node(Node("Arad"))
-        self.romania.add_node(Node("Sibiu"))
-        self.romania.add_node(Node("Timisoara"))
-        self.romania.add_node(Node("Lugoj"))
-        self.romania.add_node(Node("Mehadua"))
-        self.romania.add_node(Node("Drobeta"))
-        self.romania.add_node(Node("Craiova"))
-        self.romania.add_node(Node("Rimnicu Vilcea"))
-        self.romania.add_node(Node("Fagaras"))
-        self.romania.add_node(Node("Pitesti"))
-        self.romania.add_node(Node("Bucharest"))
-        self.romania.add_node(Node("Giurgiu"))
-        self.romania.add_node(Node("Urziceni"))
-        self.romania.add_node(Node("Neamt"))
-        self.romania.add_node(Node("Iasi"))
-        self.romania.add_node(Node("Vaslui"))
-        self.romania.add_node(Node("Hirsova"))
-        self.romania.add_node(Node("Eforie"))
+        # add cities and connections(edges) between cities
 
         self.romania.add_edge("Oradea", "Zerind", 71)
         self.romania.add_edge("Oradea", "Sibiu", 151)
         self.romania.add_edge("Zerind", "Arad", 75)
         self.romania.add_edge("Arad", "Timisoara", 118)
         self.romania.add_edge("Timisoara", "Lugoj", 111)
-        self.romania.add_edge("Lugoj", "Mehadua", 70)
-        self.romania.add_edge("Mehadua", "Drobeta", 75)
+        self.romania.add_edge("Lugoj", "Mehadia", 70)
+        self.romania.add_edge("Mehadia", "Drobeta", 75)
         self.romania.add_edge("Drobeta", "Craiova", 120)
         self.romania.add_edge("Craiova", "Pitesti", 138)
         self.romania.add_edge("Arad", "Sibiu", 140)

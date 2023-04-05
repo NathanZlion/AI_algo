@@ -67,5 +67,5 @@ Note: Definitions are excluded from the deliverables.
 - Run the desired script using `python script_name.py`
 
 ## Author
-
 - Nathnael Dereje
+

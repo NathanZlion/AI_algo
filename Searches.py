@@ -7,11 +7,13 @@ from sys import maxsize
 from Graph import Graph, Node
 from typing import List, Optional, Tuple
 from queue import PriorityQueue
+from math import radians, sqrt, sin, cos, atan2
 
 
-def bfs(graph, start, goal):
+def bfs(graph: Graph, start: str, goal:str):
     explored = set()
     queue = Queue()
+
     queue.put([start])
 
     if start == goal:
@@ -37,8 +39,7 @@ def bfs(graph, start, goal):
     return None
 
 
-
-def dfs(graph, start, goal):
+def dfs(graph: Graph, start: str, goal:str):
     explored = set()
     stack = [start]
 
@@ -67,7 +68,7 @@ def dfs(graph, start, goal):
     return None
 
 
-def ucs(graph, start, goal):
+def ucs(graph: Graph, start: str, goal:str):
     heap = [(0, start, [])]
     explored = set()
 
@@ -90,7 +91,7 @@ def ucs(graph, start, goal):
     return None
 
 
-def ids(graph, start, goal):
+def ids(graph: Graph, start: str, goal:str):
     depth = 0
 
     while True:
@@ -181,80 +182,27 @@ def bidirectional_search(graph, start, goal):
 
     return None
 
-# def get_minimum_node(node_data: dict, graph: Graph, explored) -> Optional[str]:
-#     min_ = None
-#     for node in graph.nodes:
-#         if not explored[node]:
-#             min_ = node if not min_ or (min_ and node_data[min_]['cost']) > node_data[node]['cost'] else min_
-#             # if not min_:
-#                 # min_ = node
-#             # elif node_data[min_]['cost'] > node_data[node]['cost']:
-#                 # min_ = node
-
-#     return min_
-
-# def greedy(graph: Graph, start: str, goal: str):
-#     # node_data = { node_name: [current_min_cost, previous] }
-#     node_data = {}
-
-#     # assign a maxSize of current cost estimate and a prevoius of None
-#     explored = {}
-
-#     for node in graph.nodes.keys():
-#         node_data[node] = {'cost': maxsize, 'prev':None}
-#         explored[node] = False
-
-#     # assign zero cost for the start node
-#     node_data[start]['cost'] = 0
-#     # print(explored)
-
-#     while not explored[goal]:
-
-#         # done with 0(n) time, but can be done using a priority queue.
-#         vertex = get_minimum_node(node_data, graph, explored)
-
-#         explored[vertex] = True
-
-#         vertex_node : Node = graph.search(vertex)
-
-#         # get the neighbours of vertex
-#         # update their estimate
-#         for neighbor in vertex_node.get_neighbors():
-#             neighbor = neighbor.name
-#             neighbor_node = graph.search(neighbor)
-#             if node_data[vertex]['cost'] + vertex_node.get_weight(neighbor_node) < node_data[neighbor]['cost']:
-#                 node_data[neighbor]['cost'] = node_data[vertex]['cost'] + vertex_node.get_weight(neighbor_node)
-#                 node_data[neighbor]['prev'] = vertex
-
-#     path = deque()
-#     path.append(goal)
-
-#     while node_data[path[0]]['prev']:
-#         path.appendleft(node_data[path[0]]['prev'])
-
-#     return list(path)
-
 
 def greedy_search(graph: Graph, start: str, goal: str):
     # node_data = { node_name: [current_min_cost, previous] }
     node_data = {}
 
-    # assign a maxSize of current cost estimate and a prevoius of None
     explored = {}
 
     for node in graph.nodes.keys():
-        node_data[node] = {'cost': maxsize, 'prev':None}
+        node_data[node] = {'cost': maxsize, 'prev': None}
         explored[node] = False
 
     # assign zero cost for the start node
     node_data[start]['cost'] = 0
 
     # create a priority queue and add the start node
-    priority_queue = [(0, start)]
+    priority_queue = PriorityQueue()
+    priority_queue.put((0, start))
 
-    while priority_queue:
+    while not priority_queue.empty():
         # get the minimum cost node from the priority queue
-        current_cost, vertex = heapq.heappop(priority_queue)
+        current_cost, vertex = priority_queue.get()
 
         # if the node has already been explored, skip it
         if explored[vertex]:
@@ -263,9 +211,9 @@ def greedy_search(graph: Graph, start: str, goal: str):
         # mark the node as explored
         explored[vertex] = True
 
-        vertex_node : Node = graph.search(vertex)
+        vertex_node: Node = graph.search(vertex)
 
-        # if we have reached the goal node, stop the search
+        # if we have reached the goal node, stop the search immediately (greedily)
         if explored[goal]:
             break
 
@@ -283,9 +231,8 @@ def greedy_search(graph: Graph, start: str, goal: str):
                 node_data[neighbor]['prev'] = vertex
 
                 # add the neighbor to the priority queue
-                heapq.heappush(priority_queue, (new_cost, neighbor))
+                priority_queue.put((new_cost, neighbor))
 
-    # constructing the path
     path = deque()
     path.append(goal)
 
@@ -294,15 +241,131 @@ def greedy_search(graph: Graph, start: str, goal: str):
 
     return list(path)
 
+def a_star_search(graph: Graph, start: str, goal: str, coordinates: dict[str: Tuple[float, float]]) -> Optional[List[str]]:
+    node_data = {}
 
-def a_start_search(graph: Graph, start: str, goal: str) -> Optional[List[str]]:
-    pass
+    for node in graph.nodes.keys():
+        node_data[node] = {'g_cost': maxsize, 'h_cost': heuristics(node, goal, coordinates), 'prev': None}
 
+    node_data[start]['g_cost'] = 0
 
-def heuristics(node, goal):
+    # create a priority queue and add the start node
+    priority_queue = PriorityQueue()
+    priority_queue.put((0, start))
+
+    while not priority_queue.empty():
+        # get the minimum cost node from the priority queue
+        current_cost, vertex = priority_queue.get()
+
+        # if we have reached the goal node, construct and return the path
+        if vertex == goal:
+            path = deque()
+            while vertex is not None:
+                path.appendleft(vertex)
+                vertex = node_data[vertex]['prev']
+            return list(path)
+
+        # update the cost estimates of the neighbors
+        vertex_node = graph.search(vertex)
+        for neighbor in vertex_node.get_neighbors():
+            neighbor = neighbor.name
+            neighbor_node = graph.search(neighbor)
+
+            # calculate the new cost estimate
+            new_g_cost = current_cost + vertex_node.get_weight(neighbor_node)
+            new_h_cost = heuristics(neighbor, goal, coordinates)
+            new_f_cost = new_g_cost + new_h_cost
+
+            # if the new cost estimate is better than the current estimate, update it
+            if new_f_cost < node_data[neighbor]['g_cost'] + node_data[neighbor]['h_cost']:
+                node_data[neighbor]['g_cost'] = new_g_cost
+                node_data[neighbor]['h_cost'] = new_h_cost
+                node_data[neighbor]['prev'] = vertex
+
+                priority_queue.put((new_f_cost, neighbor))
+
+    # there's no vald path to the goal from the start given
     return None
 
+
+def haversine_distance(coordinate_1, coordinate_2):
+    latitude_1, longitude_1 = coordinate_1
+    latitude_2, longitude_2 = coordinate_2
+    
+    # Convert latitudes and longitudes from degrees to radians
+    latitude_1_rad, longitude_1_rad = radians(latitude_1), radians(longitude_1)
+    latitude_2_rad, longitude_2_rad = radians(latitude_2), radians(longitude_2)
+
+    # Haversine formula 
+    distance_latitude = latitude_2_rad - latitude_1_rad 
+    distance_longitude = longitude_2_rad - longitude_1_rad 
+    a = sin(distance_latitude / 2)**2 + cos(latitude_1_rad) * cos(latitude_2_rad) * sin(distance_longitude / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1-a)) 
+
+    # Earth's radius in kilometers
+    R = 6371
+
+    # Distance in kilometers
+    distance = R * c
+
+    return distance
+
+def heuristics(city1: str, city2: str, coordinates_dict: dict[str, float]) -> int|float:
+    coordinate_1 = coordinates_dict[city1]
+    coordinate_2 = coordinates_dict[city2]
+
+    return haversine_distance(coordinate_1, coordinate_2)
+
+
 romania = Romania().getCity()
+romania_coordinates : dict[str, Tuple[float, float]] = {
+    "Arad": (46.18656, 21.31227),
+    "Bucharest": (44.42676, 26.10254),
+    "Craiova": (44.31813, 23.80450),
+    "Drobeta": (44.62524, 22.65608),
+    "Eforie": (44.06562, 28.63361),
+    "Fagaras": (45.84164, 24.97264),
+    "Giurgiu": (43.90371, 25.96993),
+    "Hirsova": (44.68935, 27.94566),
+    "Iasi": (47.15845, 27.60144),
+    "Lugoj": (45.69099, 21.90346),
+    "Mehadia": (44.90411, 22.36452),
+    "Neamt": (46.97587, 26.38188),
+    "Oradea": (47.05788, 21.94140),
+    "Pitesti": (44.85648, 24.86918),
+    "Rimnicu Vilcea": (45.10000, 24.36667),
+    "Sibiu": (45.79833, 24.12558),
+    "Timisoara": (45.75972, 21.22361),
+    "Urziceni": (44.71667, 26.63333),
+    "Vaslui": (46.64069, 27.72765),
+    "Zerind": (46.62251, 21.51742)
+}
 
-path =  a_start_search(romania, "Zerind", "Eforie")
 
+
+    
+# print(romania)
+# path = a_star_search(romania, "Arad", "Fagaras", romania_coordinates)
+# print(path)
+# print(get_path_cost(romania, path))
+
+
+def evaluateHeuristice():
+    passed = 0
+    total = 0
+    for node1 in romania_coordinates:
+        for node2 in romania_coordinates:
+            if node1 == node2:
+                continue
+            search_cost = get_path_cost(romania, a_star_search(romania, node1, node2, romania_coordinates))
+            heuristic_cost = heuristics(node1, node2, romania_coordinates)
+            if search_cost < heuristic_cost:
+                print(f'Test {passed}: {node1} => {node2}, \ndifference {heuristic_cost-search_cost}\n' )
+            else:
+                passed += 1
+            total += 1
+    print(f'Passed : {passed}/{total}')
+    print(f'Failed : {total -passed}/{total}')
+    print(f'{round(passed/total*100, 2)} % Effective Heuristics')
+
+evaluateHeuristice()
