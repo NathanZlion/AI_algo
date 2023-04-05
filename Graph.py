@@ -3,8 +3,8 @@ from typing import Any, Dict, List, Optional
 
 
 class Node:
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, name: str):
+        self.name:str = name
         self.neighbors = {}
 
     def add_neighbor(self, neighbor, weight = 0):
@@ -13,11 +13,8 @@ class Node:
     def get_neighbors(self) -> Optional[List['Node']]:
         return list(self.neighbors.keys())
 
-    def get_weight(self, neighbor):
-        try:
-            return self.neighbors[neighbor]
-        except:
-            print("cannot find neighbor", neighbor, "for city ", self.name)
+    def get_weight(self, neighbor) -> int|float:
+        return self.neighbors[neighbor] if neighbor in self.neighbors else None
 
     def __str__(self) -> str:
         return self.name + " <neighbors> : "  + str([neighbor.name for neighbor in self.neighbors.keys()])
@@ -56,8 +53,8 @@ class Graph:
         try:
             return self.nodes[item]
         except KeyError:
-            pass
-
+            raise KeyError
+    
     def __str__(self) -> str:
         lst = list()
 

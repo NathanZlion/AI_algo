@@ -7,6 +7,8 @@
     -> Experiment your code with the city graph from the image
     -> record your test.
     -> Read about node centrality concept.
+    -> There are several centralities types:
+        Compute the Degree, Closeness, Eigenvector, Katz, PageRank, and Betweenness centralities on the graph from Question 2.
 
 3- Implement the mathplot.pyplot for all your experiments
     -> install anacoda

@@ -1,5 +1,5 @@
 
-from Graph import Graph, Node
+from graph import Graph
 
 
 class Romania:
