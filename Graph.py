@@ -10,18 +10,21 @@ class Node:
     def add_neighbor(self, neighbor, weight = 0):
         self.neighbors[neighbor] = weight
 
-    def get_neighbors(self) -> Optional[List['Node']]:
+    def get_neighbors(self):
         return list(self.neighbors.keys())
 
-    def get_weight(self, neighbor) -> int|float:
-        return self.neighbors[neighbor] if neighbor in self.neighbors else None
+    def get_weight(self, neighbor):
+        return self.neighbors[neighbor]
+    
+    def number_of_edges(self):
+        return len(self.neighbors)
 
     def __str__(self) -> str:
         return self.name + " <neighbors> : "  + str([neighbor.name for neighbor in self.neighbors.keys()])
 
 class Graph:
     def __init__(self):
-        self.nodes = {}
+        self.nodes : Dict[str, Node]= {}
 
     def add_node(self, node: str) -> None:
         self.nodes[node] = Node(node)
@@ -49,11 +52,8 @@ class Graph:
             del self.nodes[node1].neighbors[self.nodes[node2]]
             del self.nodes[node2].neighbors[self.nodes[node1]]
 
-    def search(self, item) -> Optional[Node]:
-        try:
-            return self.nodes[item]
-        except KeyError:
-            raise KeyError
+    def search(self, item) -> Node:
+        return self.nodes[item]
     
     def __str__(self) -> str:
         lst = list()

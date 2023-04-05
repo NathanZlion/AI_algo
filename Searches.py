@@ -85,7 +85,7 @@ class Search:
 
                 for neighbor in neighbors:
                     if neighbor.name not in explored:
-                        heapq.heappush(heap, (cost + graph.search(node).get_weight(neighbor), neighbor.name, path))
+                        heapq.heappush(heap, (cost + graph.search(node).get_weight(neighbor), neighbor.name, path)) # type: ignore
 
         return None
 
@@ -118,7 +118,7 @@ class Search:
 
         return None
 
-    def get_path_cost(self, graph: Graph, path: List[str]) -> int:
+    def get_path_cost(self, graph: Graph, path: List[str]) -> int|float:
         cost = 0
 
         for index in range(1, len(path)):
@@ -210,7 +210,7 @@ class Search:
             # mark the node as explored
             explored[vertex] = True
 
-            vertex_node: Node = graph.search(vertex)
+            vertex_node = graph.search(vertex)
 
             # if we have reached the goal node, stop the search immediately (greedily)
             if explored[goal]:
@@ -241,7 +241,7 @@ class Search:
         return list(path)
 
 
-    def a_star_search(self, graph: Graph, start: str, goal: str, coordinates: dict[str: Tuple[float, float]]) -> Optional[List[str]]:
+    def a_star_search(self, graph: Graph, start: str, goal: str, coordinates: dict[str: Tuple[float, float]]) -> List[str]: # type: ignore
         node_data = {}
 
         for node in graph.nodes:
@@ -288,7 +288,7 @@ class Search:
                     priority_queue.put((new_f_cost, neighbor))
 
         # there's no vald path to the goal from the start given
-        return None
+        return []
 
 
     def haversine_distance(self, coordinate_1, coordinate_2) -> int|float:
@@ -328,8 +328,8 @@ class Search:
             for node2 in romania_coordinates:
                 if node1 == node2:
                     continue
-                search_cost = self.get_path_cost(romania, self.a_star_search(romania, node1, node2, romania_coordinates))
-                heuristic_cost = self.heuristics(node1, node2, romania_coordinates)
+                search_cost = self.get_path_cost(romania, self.a_star_search(romania, node1, node2, romania_coordinates))  # type: ignore
+                heuristic_cost = self.heuristics(node1, node2, romania_coordinates)  # type: ignore
                 if search_cost < heuristic_cost:
                     print(f'Test {passed}: {node1} => {node2}, \ndifference {heuristic_cost-search_cost}\n' )
                 else:
@@ -369,6 +369,6 @@ search = Search()
 
 path = search.a_star_search(romania, "Arad", "Fagaras", romania_coordinates)
 print(path)
-print(search.get_path_cost(romania, path))
+print(search.get_path_cost(romania, path)) # type: ignore
 
 # search.evaluateHeuristice()
