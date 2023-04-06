@@ -7,7 +7,6 @@ class Romania:
         self.romania = Graph()
 
         # add cities and connections(edges) between cities
-
         self.romania.add_edge("Oradea", "Zerind", 71)
         self.romania.add_edge("Oradea", "Sibiu", 151)
         self.romania.add_edge("Zerind", "Arad", 75)
@@ -32,5 +31,5 @@ class Romania:
         self.romania.add_edge("Vaslui", "Iasi", 92)
         self.romania.add_edge("Iasi", "Neamt", 87)
 
-    def getCity(self):
+    def get_city(self):
         return self.romania

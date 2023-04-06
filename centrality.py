@@ -1,13 +1,15 @@
 
+from collections import defaultdict
+from decimal import Decimal
 from Searches import Search
-from collections import defaultdict, deque
 from romaniaCity import Romania
 from queue import Queue, PriorityQueue
 import heapq
 from sys import maxsize
 from graph import Graph, Node
 from typing import List, Optional, Tuple, Dict
-from math import radians, sqrt, sin, cos, atan2
+import networkx as nx
+import numpy as np
 
 
 class centrality:
@@ -16,10 +18,10 @@ class centrality:
         """ this returns the centrality of all nodes in the input graph."""
 
         centrality = {}
-        total_nodes = len(graph.nodes)
+        total_nodes = len(graph.get_nodes())
 
         # number of connections / n -1, n = total number of nodes
-        for node in graph.nodes.values():
+        for node in graph.get_nodes().values():
             try:
                 centrality[node.name] = node.number_of_edges() /(total_nodes-1)
             except ZeroDivisionError:
@@ -28,44 +30,88 @@ class centrality:
         return centrality
 
     def closeness_centrality(self, graph: Graph, coordinates):
-        """for each node calculate the sum of shor"""
+        """for each node calculates the sum of shortest paths and averages them."""
 
         search = Search()
 
         centrality = {}
-        total_nodes = len(graph.nodes)
+        total_nodes = len(graph.get_nodes())
 
-        for node in graph.nodes: centrality[node] = 0
+        for node in graph.get_nodes(): centrality[node] = 0
 
         # for each node calculate the sum of shortest distance to all other nodes
-        for start in graph.nodes:
-            for end in graph.nodes:
+        for start in graph.get_nodes():
+            for end in graph.get_nodes():
                 centrality[start] += search.get_path_cost(graph, search.a_star_search(graph, start, end, coordinates))
         
         for node in centrality:
-            try:
+            if centrality[node] != 0:
                 centrality[node] = (1/centrality[node]) * (total_nodes-1)
-            except ZeroDivisionError:
-                centrality[node] = 0
+            else:
+                centrality[node] = maxsize
 
         return centrality
 
-    def eigenvector_centrality():
-        pass
+    def eigenvector_centrality(self, graph: Graph):
 
-    def katz_centrality():
-        pass
+        """returns the eigen vector centrality of nodes in the graph."""
+        # load the Romania graph
+        edges = graph.get_edges()
 
-    def pagerank_centrality():
-        pass
+        # create a new graph with weights as distances
+        dist_graph = nx.Graph()
+        dist_graph.add_weighted_edges_from(edges)
 
-    def betweenness_centrality():
-        pass
+        # calculate Eigenvector centrality
+        eigenvector_centrality = nx.eigenvector_centrality_numpy(dist_graph)
+
+        # reverse the centrality values
+        max_centrality = max(eigenvector_centrality.values())
+        eigenvector_centrality = {node: max_centrality - value for node, value in eigenvector_centrality.items()}
+
+        return eigenvector_centrality
+
+    def betweenness_centrality(self, graph: Graph, romania_coordinates):
+
+        paths = []
+        centrality = {}
+
+        for node in graph.get_nodes():
+            centrality[node] = 0
+
+        search = Search()
+        
+        all_nodes = [node for node in graph.get_nodes()]
+
+        # find every shortest path
+        for i in range(len(graph)):
+            for j in range(i, len(graph)):
+                # paths.append(search.a_star_search(graph, all_nodes[i], all_nodes[j], romania_coordinates))
+                paths.append(search.dijkstra(graph, all_nodes[i], all_nodes[j]))
+
+        for path in paths:
+            for index in range(1, len(path)-1):
+                centrality[path[index]] += 1
+
+        n = len(graph)
+
+        NORMALIZING_DIVIDER = (n - 1) * (n - 2) / (2)
+
+        for node in centrality.keys():
+            centrality[node] /= NORMALIZING_DIVIDER
+
+        return dict(centrality)
+
+    # def katz_centrality():
+    #     pass
+
+    # def pagerank_centrality():
+    #     pass
 
 
 
+# central = centrality().eigenvector_centrality(Romania().get_city())
 
-center = centrality()
 
 romania_coordinates : dict[str, Tuple[float, float]] = {
     "Arad": (46.18656, 21.31227),
@@ -90,4 +136,57 @@ romania_coordinates : dict[str, Tuple[float, float]] = {
     "Zerind": (46.62251, 21.51742)
 }
 
-print(center.closeness_centrality(Romania().getCity(), romania_coordinates))
+central = centrality().betweenness_centrality(Romania().get_city(), romania_coordinates)
+print(central["Oradea"])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# print(center.closeness_centrality(Romania().get_city(), romania_coordinates))
+
+# first = center.eigenvector_centrality(Romania().get_city())
+
+
+# print(first)
+
+# romania_edges = [
+#     ("Oradea", "Zerind", {"weight": 71}),
+#     ("Oradea", "Sibiu", {"weight": 151}),
+#     ("Zerind", "Arad", {"weight": 75}),
+#     ("Arad", "Sibiu", {"weight": 140}),
+#     ("Arad", "Timisoara", {"weight": 118}),
+#     ("Timisoara", "Lugoj", {"weight": 111}),
+#     ("Lugoj", "Mehadia", {"weight": 70}),
+#     ("Mehadia", "Drobeta", {"weight": 75}),
+#     ("Drobeta", "Craiova", {"weight": 120}),
+#     ("Craiova", "Pitesti", {"weight": 138}),
+#     ("Craiova", "Rimnicu Vilcea", {"weight": 146}),
+#     ("Rimnicu Vilcea", "Sibiu", {"weight": 80}),
+#     ("Sibiu", "Fagaras", {"weight": 99}),
+#     ("Fagaras", "Bucharest", {"weight": 211}),
+#     ("Pitesti", "Bucharest", {"weight": 101}),
+#     ("Rimnicu Vilcea", "Pitesti", {"weight": 97}),
+#     ("Urziceni", "Bucharest", {"weight": 85}),
+#     ("Urziceni", "Vaslui", {"weight": 142}),
+#     ("Vaslui", "Iasi", {"weight": 92}),
+#     ("Iasi", "Neamt", {"weight": 87}),
+#     ("Urziceni", "Hirsova", {"weight": 98}),
+#     ("Hirsova", "Eforie", {"weight": 86})
+# ]
+        

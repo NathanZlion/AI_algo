@@ -5,11 +5,12 @@ from queue import Queue, PriorityQueue
 import heapq
 from sys import maxsize
 from graph import Graph, Node
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 from math import radians, sqrt, sin, cos, atan2
 
 class Search:
     def bfs(self, graph: Graph, start: str, goal:str):
+        """using a `Queue` data structure, finds the shortest path between two nodes. If there's no path between the nodes it returns `None`"""
         explored = set()
         queue = Queue()
 
@@ -38,34 +39,51 @@ class Search:
         return None
 
 
-    def dfs(self, graph: Graph, start: str, goal:str):
-        explored = set()
-        stack = [start]
+    # def dfs(self, graph: Graph, start: str, goal:str):
+    #     explored = set()
+    #     stack = [start]
+
+    #     if start == goal:
+    #         return [start]
+
+    #     while stack:
+    #         node = stack.pop()
+
+    #         if node not in explored:
+    #             explored.add(node)
+
+    #             if node == goal:
+    #                 return [node]
+
+    #             neighbors = graph.search(node).get_neighbors()
+
+    #             for neighbor in neighbors:
+    #                 if neighbor.name not in explored:
+    #                     path = self.dfs(graph, neighbor.name, goal)
+
+    #                     if path:
+    #                         path.insert(0, node)
+    #                         return path
+
+    #     return None
+
+    def dfs(self, graph: Graph, start: str, goal:str, visited=None):
+        if visited is None:
+            visited = set()
+        visited.add(start)
 
         if start == goal:
             return [start]
 
-        while stack:
-            node = stack.pop()
+        for neighbor in graph.search(start).get_neighbors():
+            if neighbor.name not in visited:
+                path = self.dfs(graph, neighbor.name, goal, visited)
 
-            if node not in explored:
-                explored.add(node)
-
-                if node == goal:
-                    return [node]
-
-                neighbors = graph.search(node).get_neighbors()
-
-                for neighbor in neighbors:
-                    if neighbor.name not in explored:
-                        path = self.dfs(graph, neighbor.name, goal)
-
-                        if path:
-                            path.insert(0, node)
-                            return path
+                if path is not None:
+                    path.insert(0, start)
+                    return path
 
         return None
-
 
     def ucs(self, graph: Graph, start: str, goal:str):
         heap = [(0, start, [])]
@@ -183,12 +201,13 @@ class Search:
 
 
     def greedy_search(self, graph: Graph, start: str, goal: str):
+
         # node_data = { node_name: [current_min_cost, previous] }
         node_data = {}
 
         explored = {}
 
-        for node in graph.nodes.keys():
+        for node in graph.get_nodes():
             node_data[node] = {'cost': maxsize, 'prev': None}
             explored[node] = False
 
@@ -202,10 +221,6 @@ class Search:
         while not priority_queue.empty():
             # get the minimum cost node from the priority queue
             current_cost, vertex = priority_queue.get()
-
-            # if the node has already been explored, skip it
-            if explored[vertex]:
-                continue
 
             # mark the node as explored
             explored[vertex] = True
@@ -244,7 +259,7 @@ class Search:
     def a_star_search(self, graph: Graph, start: str, goal: str, coordinates: dict[str: Tuple[float, float]]) -> List[str]: # type: ignore
         node_data = {}
 
-        for node in graph.nodes:
+        for node in graph.get_nodes():
             node_data[node] = {
                 'g_cost': maxsize,
                 'h_cost': self.heuristics(node, goal, coordinates),
@@ -321,15 +336,15 @@ class Search:
         return self.haversine_distance(coordinate_1, coordinate_2)
 
 
-    def evaluateHeuristice(self):
+    def evaluateHeuristice(self, graph: Graph, coordinates: Dict[str, Tuple[float, float]]):
         passed = 0
         total = 0
-        for node1 in romania_coordinates:
-            for node2 in romania_coordinates:
+        for node1 in coordinates:
+            for node2 in coordinates:
                 if node1 == node2:
                     continue
-                search_cost = self.get_path_cost(romania, self.a_star_search(romania, node1, node2, romania_coordinates))  # type: ignore
-                heuristic_cost = self.heuristics(node1, node2, romania_coordinates)  # type: ignore
+                search_cost = self.get_path_cost(graph, self.a_star_search(graph, node1, node2, coordinates))  # type: ignore
+                heuristic_cost = self.heuristics(node1, node2, coordinates)  # type: ignore
                 if search_cost < heuristic_cost:
                     print(f'Test {passed}: {node1} => {node2}, \ndifference {heuristic_cost-search_cost}\n' )
                 else:
@@ -339,36 +354,89 @@ class Search:
         print(f'Failed : {total -passed}/{total}')
         print(f'{round(passed/total*100, 2)} % Effective Heuristics')
 
-romania = Romania().getCity()
-romania_coordinates : dict[str, Tuple[float, float]] = {
-    "Arad": (46.18656, 21.31227),
-    "Bucharest": (44.42676, 26.10254),
-    "Craiova": (44.31813, 23.80450),
-    "Drobeta": (44.62524, 22.65608),
-    "Eforie": (44.06562, 28.63361),
-    "Fagaras": (45.84164, 24.97264),
-    "Giurgiu": (43.90371, 25.96993),
-    "Hirsova": (44.68935, 27.94566),
-    "Iasi": (47.15845, 27.60144),
-    "Lugoj": (45.69099, 21.90346),
-    "Mehadia": (44.90411, 22.36452),
-    "Neamt": (46.97587, 26.38188),
-    "Oradea": (47.05788, 21.94140),
-    "Pitesti": (44.85648, 24.86918),
-    "Rimnicu Vilcea": (45.10000, 24.36667),
-    "Sibiu": (45.79833, 24.12558),
-    "Timisoara": (45.75972, 21.22361),
-    "Urziceni": (44.71667, 26.63333),
-    "Vaslui": (46.64069, 27.72765),
-    "Zerind": (46.62251, 21.51742)
-}
 
+    def graph_to_dict(self, graph: Graph):
+        dictionary = {}
+
+        for node_name,node  in graph.get_nodes().items():
+            dictionary[node_name] = {}
+            neighbors = node.get_neighbors()
+            for neighbor in neighbors:
+                dictionary[node_name][neighbor.name] = graph.get_cost(node.name, neighbor.name)
+        
+        return dictionary
+
+    def dijkstra(self, graph: Graph, start:str, end:str):
+
+        adj_dict = self.graph_to_dict(graph)
+
+        # Initialize the distance and previous dictionaries
+        distances = {node: float('infinity') for node in adj_dict}
+        distances[start] = 0
+        previous = {node: None for node in adj_dict}
+
+        # Initialize the priority queue
+        priority_queue = [(0, start)]
+        
+        while priority_queue:
+            # Get the node with the minimum distance value
+            current_distance, current_node = heapq.heappop(priority_queue)
+            
+            # Skip already visited nodes
+            if current_distance > distances[current_node]:
+                continue
+            
+            # For each neighbor of the current node
+            for neighbor, weight in adj_dict[current_node].items():
+                # Calculate the distance to the neighbor               
+                new_distance = current_distance + weight
+                
+                # If the new distance is shorter, update the distances and previous dictionaries
+                if new_distance < distances[neighbor]:
+                    distances[neighbor] = new_distance
+                    previous[neighbor] = current_node # type: ignore
+                    heapq.heappush(priority_queue, (new_distance, neighbor))
+                    
+        # If the end node is specified, return the shortest path and its distance, otherwise return the distances dictionary
+        path = []
+        node = end
+        while node:
+            path.append(node)
+            node = previous[node]
+        return path[::-1]
+
+romania = Romania().get_city()
+
+# romania_coordinates : dict[str, Tuple[float, float]] = {
+#     "Arad": (46.18656, 21.31227),
+#     "Bucharest": (44.42676, 26.10254),
+#     "Craiova": (44.31813, 23.80450),
+#     "Drobeta": (44.62524, 22.65608),
+#     "Eforie": (44.06562, 28.63361),
+#     "Fagaras": (45.84164, 24.97264),
+#     "Giurgiu": (43.90371, 25.96993),
+#     "Hirsova": (44.68935, 27.94566),
+#     "Iasi": (47.15845, 27.60144),
+#     "Lugoj": (45.69099, 21.90346),
+#     "Mehadia": (44.90411, 22.36452),
+#     "Neamt": (46.97587, 26.38188),
+#     "Oradea": (47.05788, 21.94140),
+#     "Pitesti": (44.85648, 24.86918),
+#     "Rimnicu Vilcea": (45.10000, 24.36667),
+#     "Sibiu": (45.79833, 24.12558),
+#     "Timisoara": (45.75972, 21.22361),
+#     "Urziceni": (44.71667, 26.63333),
+#     "Vaslui": (46.64069, 27.72765),
+#     "Zerind": (46.62251, 21.51742)
+# }
 
 
 search = Search()
 
-path = search.a_star_search(romania, "Arad", "Fagaras", romania_coordinates)
-print(path)
-print(search.get_path_cost(romania, path)) # type: ignore
+# path = search.a_star_search(romania, "Arad", "Fagaras", romania_coordinates)
+path = search.dijkstra(romania, "Arad", "Fagaras")
 
-# search.evaluateHeuristice()
+# print(path)
+# print(search.get_path_cost(romania, path)) # type: ignore
+
+# search.evaluateHeuristice(romania ,romania_coordinates)
