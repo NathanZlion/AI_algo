@@ -4,10 +4,11 @@ from typing import Any, Dict, List, Optional, Tuple
 
 class Node:
     def __init__(self, name: str):
-        self.name:str = name
+        self.name: str = name
         self._neighbors: Dict['Node', int|float] = {}
 
     def add_neighbor(self, neighbor: 'Node', weight = 0):
+        """Adds the neighbor node to the node's neghbors list"""
         self._neighbors[neighbor] = weight
 
     def get_neighbors(self) -> Dict['Node', int|float]:
@@ -20,7 +21,7 @@ class Node:
     def number_of_edges(self):
         return len(self._neighbors)
 
-    def is_neighbor_of(self, node: 'Node'):
+    def is_neighbor_of(self, node: 'Node') -> bool:
         return node in self._neighbors
 
     def __str__(self) -> str:
@@ -63,12 +64,12 @@ class Graph:
         return self._nodes[node1].is_neighbor_of(self._nodes[node2])
     
     def get_nodes(self) -> Dict[str, Node]:
+        """returns a dictionary of all nodes in the current graph where the name of the node is the key \
+            and the reference (pointer thing ...) to that node, the node it self, is the values."""
         return self._nodes
 
-    def get_edges(self) -> List[Tuple[str, str, str|int|float]]:
-
-        # intended output
-        # [] ("Oradea", "Zerind", 71) ,  ...]
+    def get_edges(self) -> List[Tuple[str, str, Dict[str, str|int|float]]]:
+        # [("Oradea", "Zerind", {'weight' : 71}) ,  ...]
 
         weights : Dict[Tuple[str,str], int|float]= {}
         for node in self.get_nodes().values():
@@ -76,9 +77,43 @@ class Graph:
                 if not (node.name, neighbor.name) in weights and not (neighbor.name, node.name) in weights:
                     weights[(node.name, neighbor.name)] = node.get_weight(neighbor)
         
-        res = [(node1, node2,weights[(node1, node2)]) for (node1, node2) in weights]
+        # ('Bucharest', 'Urziceni', {'weight':85}),
+        res = [(node1, node2, {'weight': weights[(node1, node2)]}) for (node1, node2) in weights]
 
         return res
+    
+    def get_inverted_edges(self):
+        res = []
+        for l in self.get_edges():
+            res.append((l[0], l[1], {'weight': 1/l[2]['weight']}))  # type: ignore
+
+        return res
+
+    def get_adjecency_matrix(self) -> Tuple[Dict[str, int], List[List[int]]]:
+        """returns the adjecency matrix of this graph."""
+
+        # for every node assign an integer that is the row, col in the matrix
+        n = self.get_number_of_nodes()
+        map_node_index = {}
+        ctr = 0
+        for node in self._nodes:
+            map_node_index[node] = ctr
+            ctr +=1
+
+        adj_matrix = [[0 for _ in range(n)] for _ in range(n)]
+
+        for edge in self.get_edges():
+            node1, node2, weight = edge
+            node1_index = map_node_index[node1]
+            node2_index = map_node_index[node2]
+            adj_matrix[node1_index][node2_index] = weight
+            adj_matrix[node1_index][node1_index] = weight
+        
+        # return both dictionary and adj_matrix
+        return (map_node_index, adj_matrix)
+
+    def get_number_of_nodes(self) -> int:
+        return len(self._nodes)
 
     def __str__(self) -> str:
         lst = list()

@@ -1,5 +1,7 @@
 
-from graph import Graph
+import re
+from typing import Dict, Tuple
+from undirectedGraph import Graph
 
 
 class Romania:
@@ -33,3 +35,17 @@ class Romania:
 
     def get_city(self):
         return self.romania
+
+    def get_coordinates(self) -> Dict[str, Tuple[float, float]] :
+        romania_coordinates : dict[str, Tuple[float, float]] = {}
+        with open("coordinates.txt", "r") as ef:
+                for edges in ef:
+                    edges_content = re.split('[:\n]', edges)
+                    edges_content.pop()
+                    edges_content = edges_content[0].split('    ')
+                    romania_coordinates[edges_content[0]] = (float(edges_content[1]), float(edges_content[2]))
+        
+        return romania_coordinates
+
+
+

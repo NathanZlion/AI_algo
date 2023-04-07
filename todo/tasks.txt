@@ -1,6 +1,8 @@
 
 
 1- learn a bit about the mathplot.pyplot library
+    -> graph plotting
+    -> table creation and populating it.
 2- coding
     -> Implement a graph, node, edge class
     -> Implement `BFS`, DFS, UCS, `Iterative Deepening`, `Bidirectional Search`, `Greedy`, and A* Search algorithms
