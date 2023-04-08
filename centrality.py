@@ -8,7 +8,7 @@ from typing import List, Optional, Tuple, Dict
 import networkx as nx
 
 
-class centrality:
+class Centrality:
     def degree_centrality(self, graph: Graph):
         """ This returns the degree centrality of all nodes in the input graph."""
 
@@ -38,7 +38,7 @@ class centrality:
         # for each node calculate the sum of shortest distance to all other nodes
         for source in graph.get_nodes():
             for destination in graph.get_nodes():
-                centrality[source] += search.get_path_cost(graph, search.dijkstra(graph, source, destination))
+                centrality[source] += search.get_path_cost(graph, search.dijkstra_search(graph, source, destination))
         
         for node in centrality:
             centrality[node] = maxsize if centrality[node] == 0 else (total_nodes-1) * (1/centrality[node])
@@ -66,7 +66,7 @@ class centrality:
         # find every shortest path
         for i in range(len(graph)):
             for j in range(i, len(graph)):
-                paths.append(search.dijkstra(graph, all_nodes[i], all_nodes[j]))
+                paths.append(search.dijkstra_search(graph, all_nodes[i], all_nodes[j]))
 
         for path in paths:
             for index in range(1, len(path)-1):
@@ -122,6 +122,3 @@ class centrality:
         
         return pr
 
-
-
-print(centrality().eigenvector_centrality(graph = Romania().get_city()))

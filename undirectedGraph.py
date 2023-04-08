@@ -57,7 +57,7 @@ class Graph:
             del self._nodes[node1].get_neighbors()[self._nodes[node2]]
             del self._nodes[node2].get_neighbors()[self._nodes[node1]]
 
-    def search(self, item) -> Node:
+    def get_node(self, item: str) -> Node:
         return self._nodes[item]
     
     def have_edge(self, node1: str, node2: str) -> bool:

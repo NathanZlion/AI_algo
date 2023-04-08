@@ -104,16 +104,10 @@ ___
 
 
 
-
-
-
-
-
-
-
-
-
 ___
 
 ## Author
 - Nathnael Dereje
+
+
+- Dijkstra search, A* search (with a consistent heuristic), and bi-directional search (with a consistent heuristic) guarantee to get the best (shortest) path in an undirected weighted search.
