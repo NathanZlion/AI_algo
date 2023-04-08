@@ -69,19 +69,16 @@ class Graph:
         return self._nodes
 
     def get_edges(self) -> List[Tuple[str, str, Dict[str, str|int|float]]]:
-        # [("Oradea", "Zerind", {'weight' : 71}) ,  ...]
 
         weights : Dict[Tuple[str,str], int|float]= {}
+
         for node in self.get_nodes().values():
             for neighbor in node.get_neighbors():
                 if not (node.name, neighbor.name) in weights and not (neighbor.name, node.name) in weights:
                     weights[(node.name, neighbor.name)] = node.get_weight(neighbor)
-        
-        # ('Bucharest', 'Urziceni', {'weight':85}),
-        res = [(node1, node2, {'weight': weights[(node1, node2)]}) for (node1, node2) in weights]
 
-        return res
-    
+        return [(node1, node2, {'weight': weights[(node1, node2)]}) for (node1, node2) in weights]
+
     def get_inverted_edges(self):
         res = []
         for l in self.get_edges():
@@ -115,6 +112,9 @@ class Graph:
     def get_number_of_nodes(self) -> int:
         return len(self._nodes)
 
+    def __len__(self) -> int:
+        return len(self.get_nodes())
+
     def __str__(self) -> str:
         lst = list()
 
@@ -122,7 +122,4 @@ class Graph:
             lst.append(str(node))
 
         return str("\n-> ".join(lst))
-
-    def __len__(self) -> int:
-        return len(self.get_nodes())
 

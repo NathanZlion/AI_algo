@@ -39,7 +39,7 @@ class Search:
 
                 explored.add(node)
 
-        return None
+        return []
 
 
     def dfs(self, graph: Graph, start: str, goal:str, visited=None):
@@ -57,8 +57,9 @@ class Search:
                 if path is not None:
                     path.insert(0, start)
                     return path
-
-        return None
+        
+        # no path found
+        return []
 
     def ucs(self, graph: Graph, start: str, goal:str):
         heap = [(0, start, [])]
@@ -81,7 +82,7 @@ class Search:
                     if neighbor.name not in explored:
                         heapq.heappush(heap, (cost + graph.search(node).get_weight(neighbor), neighbor.name, path)) # type: ignore
 
-        return None
+        return []
 
 
     def ids(self, graph: Graph, start: str, goal:str):
@@ -122,7 +123,7 @@ class Search:
 
         return cost
 
-    def bidirectional_search(self, graph: Graph, start: str, goal: str) -> Optional[List[str]]:
+    def bidirectional_search(self, graph: Graph, start: str, goal: str) -> List[str]:
         start_queue = Queue()
         start_queue.put([start])
 
@@ -174,13 +175,12 @@ class Search:
                         new_path = list(goal_path)
                         new_path.append(neighbor.name)
                         goal_queue.put(new_path)
-
-        return None
+        # no path found
+        return []
 
 
     def greedy_search(self, graph: Graph, start: str, goal: str):
 
-        # node_data = { node_name: [current_min_cost, previous] }
         node_data = {}
         explored = {}
 
@@ -224,6 +224,9 @@ class Search:
                     # add the neighbor to the priority queue
                     priority_queue.put((new_cost, neighbor))
 
+        return self.trace_path(goal, node_data)
+
+    def trace_path(self, goal, node_data):
         path = deque()
         path.append(goal)
 
@@ -231,6 +234,8 @@ class Search:
             path.appendleft(node_data[path[0]]['prev'])
 
         return list(path)
+
+
 
 
     def a_star_search(self, graph: Graph, start: str, goal: str, coordinates: dict[str: Tuple[float, float]]) -> List[str]: # type: ignore
@@ -272,13 +277,13 @@ class Search:
             for neighbor_node in vertex_node.get_neighbors():
                 neighbor = neighbor_node.name
                 new_g_cost = current_cost + graph.get_cost(vertex, neighbor)
+                new_f_cost = new_g_cost + node_data[neighbor]['h_cost']
 
                 # if the new cost estimate is better than the current estimate, update it
                 if new_g_cost < node_data[neighbor]['g_cost']:
-                    new_f_cost = new_g_cost + node_data[neighbor]['h_cost']
                     node_data[neighbor]['g_cost'] = new_g_cost
                     node_data[neighbor]['prev'] = vertex
-                    heapq.heappush(priority_queue, (new_f_cost, neighbor))
+                heapq.heappush(priority_queue, (new_f_cost, neighbor))
 
         # there's no valid path to the goal from the start given
         return []
@@ -387,23 +392,23 @@ romania = Romania().get_city()
 search = Search()
 
 path1 = search.ucs(romania, "Oradea", "Neamt")
-print(path1, search.get_path_cost(romania, path1)) # type: ignore
+print(path1, search.get_path_cost(romania, path1), "ucs")  # type: ignore
 
 path2 = search.dijkstra(romania, "Oradea", "Neamt")
-print(path2, search.get_path_cost(romania, path2)) # type: ignore
+print(path2, search.get_path_cost(romania, path2), "dijkstra") # type: ignore
 
 path3 = search.a_star_search(romania, "Oradea", "Neamt", Romania().get_coordinates())
-print(path3, search.get_path_cost(romania, path3)) # type: ignore
+print(path3, search.get_path_cost(romania, path3), "a_star") # type: ignore
 
 path4 = search.bidirectional_search(romania, "Oradea", "Neamt")
-print(path4, search.get_path_cost(romania, path4)) # type: ignore
+print(path4, search.get_path_cost(romania, path4), "bi-directional") # type: ignore
 
 path5 = search.ids(romania, "Oradea", "Neamt")
-print(path5, search.get_path_cost(romania, path5)) # type: ignore
+print(path5, search.get_path_cost(romania, path5), "ids") # type: ignore
 
 path6 = search.bfs(romania, "Oradea", "Neamt")
-print(path6, search.get_path_cost(romania, path6)) # type: ignore
-
+print(path6, search.get_path_cost(romania, path6), "bfs") # type: ignore
 
 path7 = search.greedy_search(romania, "Oradea", "Neamt")
-print(path7, search.get_path_cost(romania, path7)) # type: ignore
+print(path7, search.get_path_cost(romania, path7), "greedy") # type: ignore
+
