@@ -5,51 +5,50 @@ from queue import Queue, PriorityQueue
 import heapq
 from sys import maxsize
 from undirectedGraph import Graph, Node
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 from math import radians, sqrt, sin, cos, atan2
 
 class Search:
     """ Implemented different methods to search a graph."""
 
-    def trace_path(self, goal, parent) -> List[str]:
-        """ Traces a path to the start from the goal state and returns a list of path taken."""
+    def trace_path(self, goal, parent_map) -> List[str]:
+        """Traces a path to the start from the goal state and returns a list of path taken."""
         path = deque([goal])
 
-        while parent[path[0]]:
-            path.appendleft(parent[path[0]])
+        while parent_map[path[0]]:
+            path.appendleft(parent_map[path[0]])
 
         return list(path)
 
 
     def bfs(self, graph: Graph, start: str, goal:str):
         """
-        `Breadth First Search (BFS)`: is a graph traversal algorithm that explores the vertices of a graph\
+        BFS : `Breadth First Search` is a graph traversal algorithm that explores the vertices of a graph\
         in breadth-first order, meaning it visits all the neighbors of a vertex before moving on to their\
         neighbors. If there's no path between the nodes it returns ` an empty list 1[]`.
         """
         explored = set()
-        queue: Queue[List[str]]= Queue()
+        queue : Queue[List[str]] = Queue()
         queue.put([start])
 
-        if start == goal:
-            return [start]
+        if start == goal:return [start]
 
         while not queue.empty():
             path = queue.get()
             node = path[-1]
 
             if node not in explored:
+                explored.add(node)
                 neighbors = graph.get_node(node).get_neighbors()
 
                 for neighbor in neighbors:
-                    new_path = path[:]
+                    new_path = path.copy()
                     new_path.append(neighbor.name)
                     queue.put(new_path)
 
                     if neighbor.name == goal:
                         return new_path
 
-                explored.add(node)
 
         return []
 
@@ -65,7 +64,6 @@ class Search:
 
         while stack:
             path = stack.pop()
-            print(path)
             node = path[-1]
 
             if node not in explored:
@@ -106,21 +104,55 @@ class Search:
                 if path is not None:
                     path.insert(0, start)
                     return path
-        
+
         return []
 
 
-    def ucs(self, graph: Graph, start: str, goal:str):
+    def dijkstra_search(self, graph: Graph, start: str, goal: str) -> List[str]:
         """
-            Implements a `Uniform cost first search` for a graph and returns the path between the start\
-            and goal. Returns `[] empty list` if there is no valid path. Explores all paths.
+            Finds the shortest path between start and goal in the graph using the dijkstra \
+            searching algorithm. It works for a weighted graph too.
+        """
+        distances = {node: float('inf') for node in graph.get_nodes().keys()}
+        parent_map : Dict[str, Optional[str]] = {node: None for node in graph.get_nodes().keys()}
+        distances[start] = 0
+        priority_queue : list[tuple[int|float, str]]= [(0, start)]
+        explored : Set[str] = set()
+
+        while len(priority_queue) > 0:
+            curr_dist, curr_vertex = heapq.heappop(priority_queue)
+
+            if curr_vertex == goal:
+                return self.trace_path(goal, parent_map)
+
+            # if a shorter path is already been explored don't discover
+            if curr_dist > distances[curr_vertex] or curr_vertex in explored:
+                continue
+
+            for neighbor, weight in graph.get_node(curr_vertex).get_neighbors().items():
+                new_distance = curr_dist + weight
+
+                if new_distance < distances[neighbor.name]:
+                    distances[neighbor.name] = new_distance
+                    parent_map[neighbor.name] = curr_vertex
+                    heapq.heappush(priority_queue, (new_distance, neighbor.name))
+
+            explored.add(curr_vertex)
+
+        return []
+
+
+    def ucs(self, graph: Graph, start: str, goal:str) -> List[str]:
+        """
+        UCS: `Uniform cost first search` for a graph and returns the path between the start\
+        and goal. Returns `empty list` if there is no valid path. Explores all paths.
         """
         heap : List[Tuple[int|float, str, List[str]]] = [(0, start, [])]
         explored = set()
 
         while heap:
-            (cost, node, path) = heapq.heappop(heap)
-            print(path)
+            # get the least cost path so far.
+            (curr_cost, node, path) = heapq.heappop(heap)
 
             if node not in explored:
                 explored.add(node)
@@ -133,50 +165,66 @@ class Search:
 
                 for neighbor in neighbors:
                     if neighbor.name not in explored:
-                        heapq.heappush(heap, (cost + graph.get_node(node).get_weight(neighbor), neighbor.name, path))
+                        cost_of_path = curr_cost + graph.get_node(node).get_weight(neighbor)
+                        heapq.heappush(heap, (cost_of_path, neighbor.name, path.copy()))
 
         return []
 
 
-    def ids(self, graph: Graph, start: str, goal:str):
-        """Uses Iterative deepining searching algorithm to get path between the """
-        depth = 0
-
-        while True:
-            result = self.dls(graph, start, goal, depth)
-
-            if result is not None:
-                return result
-
-            depth += 1
-
-
-    def dls(self, graph, start, goal, depth):
-        """depth limited search algorithm."""
-        if depth == 0 and start == goal:
+    def dls(self, graph: Graph, start: str, goal: str, max_depth: int = 20):
+        """
+        DLS : `Depth limited search` algorithm. Returns a list path to the goal if \
+        the goal is found within `max_depth` steps form the start node. returns `None` \
+        if a valid path is inexistent within the specified `max_depth`.
+        """ 
+    
+        if max_depth == 0 and start == goal:
             return [start]
 
-        if depth > 0:
+        if max_depth > 0:
             neighbors = graph.get_node(start).get_neighbors()
 
             for neighbor in neighbors:
-                result = self.dls(graph, neighbor.name, goal, depth - 1)
+                result : Optional[List[str]] = self.dls(graph, neighbor.name, goal, max_depth - 1)
 
+                # result found, add current node at frond and return to caller.
                 if result is not None:
                     result.insert(0, start)
                     return result
 
         return None
 
+
+    def ids(self, graph: Graph, start: str, goal:str):
+        """
+        Uses `Iterative deepining searching` algorithm that tries depth limited search \
+        for a certain depth. If goal is not found within that depth, It tries to go deeper \
+        one more depth and search again.
+        """
+        depth = 0
+
+        for _ in range(len(graph)):
+            result = self.dls(graph, start, goal, depth)
+
+            if result: return result
+
+            depth += 1
+
+        return []
+
+
     def get_path_cost(self, graph: Graph, path: List[str]) -> int|float:
-        cost = 0
+        """Returns the cost of the path followed."""
 
-        for index in range(1, len(path)):
-            cost+= graph.get_cost(path[index-1], path[index])
+        return sum([graph.get_cost(path[index], path[index+1]) \
+                    for index in range(len(path)-1)])
 
-        return cost
 
     def bidirectional_search(self, graph: Graph, start: str, goal: str) -> List[str]:
+        """`Bidirectional search` searches for a path between start and goal. It does this by\
+            starting its search from both ends. Once the two paths meet from opposite sides it \
+            returns the path taken from start to end. Returns an empty list if no path exists."""
+
         start_queue = Queue()
         start_queue.put([start])
 
@@ -228,19 +276,19 @@ class Search:
                         new_path = list(goal_path)
                         new_path.append(neighbor.name)
                         goal_queue.put(new_path)
-        # no path found
+
         return []
 
 
     def greedy_search(self, graph: Graph, start: str, goal: str):
 
-        parent = {}
+        parent_map = {}
         cost = {}
         explored = {}
 
         for node in graph.get_nodes():
             cost[node] = maxsize
-            parent[node] = None
+            parent_map[node] = None
             explored[node] = False
 
         # assign zero cost for the start node
@@ -274,64 +322,52 @@ class Search:
                 # if the new cost estimate is better than the current estimate, update it
                 if new_cost < cost[neighbor]:
                     cost[neighbor] = new_cost
-                    parent[neighbor] = vertex
+                    parent_map[neighbor] = vertex
 
                     # add the neighbor to the priority queue
                     priority_queue.put((new_cost, neighbor))
 
-        return self.trace_path(goal, parent)
+        return self.trace_path(goal, parent_map)
 
-    def a_star_search(self, graph: Graph, start: str, goal: str, coordinates: dict[str: Tuple[float, float]]) -> List[str]: # type: ignore
-        node_data = {}
-        explored = set()
-
-        for node in graph.get_nodes():
-            node_data[node] = {
-                'g_cost': float('inf'),
-                'h_cost': self.heuristics(node, goal, coordinates),
-                'prev': None
-            }
-
-        node_data[start]['g_cost'] = 0
+    def a_star_search(self, graph: Graph, start: str, goal: str, coordinates) -> List[str]:
+        explored: Set[str] = set()
+        g_cost = {node: float('inf') for node in graph.get_nodes()}
+        heuristics = {node: self.heuristics(node, goal, coordinates) for node in graph.get_nodes()}
+        parent: dict[str, Optional[str]] = {node: None for node in graph.get_nodes()}
+        g_cost[start] = 0
 
         # create a priority queue and add the start node
-        priority_queue = [(0, start)]
+        priority_queue: List[Tuple[int|float, str]] = [(0, start)]
+        heapq.heapify(priority_queue)
 
-        while len(priority_queue) > 0:
-            # get the minimum cost node from the priority queue
+
+        while priority_queue:
             current_cost, vertex = heapq.heappop(priority_queue)
 
             if vertex in explored:
                 continue
 
             explored.add(vertex)
-
-            # if we have reached the goal node, construct and return the path
             if vertex == goal:
-                path = deque()
-                while vertex is not None:
-                    path.appendleft(vertex)
-                    vertex = node_data[vertex]['prev']
-
-                return list(path)
+                return self.trace_path(goal, parent)
 
             # update the cost estimates of the neighbors
             vertex_node = graph.get_node(vertex)
             for neighbor_node in vertex_node.get_neighbors():
                 neighbor = neighbor_node.name
                 new_g_cost = current_cost + graph.get_cost(vertex, neighbor)
-                new_f_cost = new_g_cost + node_data[neighbor]['h_cost']
 
                 # if the new cost estimate is better than the current estimate, update it
-                if new_g_cost < node_data[neighbor]['g_cost']:
-                    node_data[neighbor]['g_cost'] = new_g_cost
-                    node_data[neighbor]['prev'] = vertex
-                heapq.heappush(priority_queue, (new_f_cost, neighbor))
+                if new_g_cost < g_cost[neighbor]:
+                    g_cost[neighbor] = new_g_cost
+                    parent[neighbor] = vertex
+                    heapq.heappush(priority_queue, (g_cost[neighbor] + 0.07*heuristics[neighbor], neighbor))
 
-        # there's no valid path to the goal from the start given
+
         return []
 
-    def haversine_distance(self, coordinate_1, coordinate_2) -> float:
+    @staticmethod
+    def haversine_distance(coordinate_1, coordinate_2) -> float:
         latitude_1, longitude_1 = coordinate_1
         latitude_2, longitude_2 = coordinate_2
 
@@ -353,8 +389,8 @@ class Search:
 
         return distance
 
-
     def heuristics(self, city1: str, city2: str, coordinates_dict: dict[str, float]) -> int|float:
+
         coordinate_1 = coordinates_dict[city1]
         coordinate_2 = coordinates_dict[city2]
 
@@ -362,16 +398,18 @@ class Search:
 
 
     def evaluateHeuristice(self, graph: Graph, coordinates: Dict[str, Tuple[float, float]]):
+        
         passed = 0
         total = 0
+
         for node1 in coordinates:
             for node2 in coordinates:
                 if node1 == node2:
                     continue
-                search_cost = self.get_path_cost(graph, self.a_star_search(graph, node1, node2, coordinates))  # type: ignore
+                search_cost = self.get_path_cost(graph, self.dijkstra_search(graph, node1, node2))
                 heuristic_cost = self.heuristics(node1, node2, coordinates)  # type: ignore
                 if search_cost < heuristic_cost:
-                    print(f'Test {passed}: {node1} => {node2}, \ndifference {heuristic_cost-search_cost}\n' )
+                    print(f'Test {total}: {node1} => {node2}, \ndifference {heuristic_cost-search_cost}\n' )
                 else:
                     passed += 1
                 total += 1
@@ -390,36 +428,6 @@ class Search:
                 dictionary[node_name][neighbor.name] = graph.get_cost(node.name, neighbor.name)
         
         return dictionary
-    
-    def dijkstra_search(self, graph: Graph, start: str, goal: str) -> List[str]:
-        """
-            Finds the shortest path between start and goal in the graph using the dijkstra \
-            searching algorithm. It works for a weighted graph too.
-        """
-        distances = {node: float('inf') for node in graph.get_nodes().keys()}
-        parent : Dict[str, Optional[str]] = {node: None for node in graph.get_nodes().keys()}
-        distances[start] = 0
-        priority_queue : list[tuple[int|float, str]]= [(0, start)]
-
-        while len(priority_queue) > 0:
-            curr_dist, curr_vertex = heapq.heappop(priority_queue)
-
-            if curr_vertex == goal: return self.trace_path(goal, parent)
-
-            # if a shorter path is already been explored don't discover them
-            if curr_dist > distances[curr_vertex]: continue
-
-            for neighbor, weight in graph.get_node(curr_vertex).get_neighbors().items():
-                total_distance = curr_dist + weight
-                
-                if total_distance < distances[neighbor.name]:
-                    distances[neighbor.name] = total_distance
-                    parent[neighbor.name] = curr_vertex
-                    heapq.heappush(priority_queue, (total_distance, neighbor.name))
-
-        return []
-
-
 
 
 if __name__ == "__main__":
@@ -429,28 +437,27 @@ if __name__ == "__main__":
     path1 = search.ucs(romania, "Oradea", "Eforie")
     print(path1, search.get_path_cost(romania, path1), "ucs")  # type: ignore
 
-    # path2 = search.dijkstra_search(romania, "Oradea", "Neamt")
-    # print(path2, search.get_path_cost(romania, path2), "dijkstra") # type: ignore
+    path2 = search.dijkstra_search(romania, "Oradea", "Neamt")
+    print(path2, search.get_path_cost(romania, path2), "dijkstra") # type: ignore
 
-    # path3 = search.a_star_search(romania, "Oradea", "Neamt", Romania().get_coordinates())
-    # print(path3, search.get_path_cost(romania, path3), "a_star") # type: ignore
+    path3 = search.a_star_search(romania, "Oradea", "Neamt", Romania().get_coordinates())
+    print(path3, search.get_path_cost(romania, path3), "a_star") # type: ignore
 
-    # path4 = search.bidirectional_search(romania, "Oradea", "Neamt")
-    # print(path4, search.get_path_cost(romania, path4), "bi-directional") # type: ignore
+    path4 = search.bidirectional_search(romania, "Oradea", "Neamt")
+    print(path4, search.get_path_cost(romania, path4), "bi-directional") # type: ignore
 
-    # path5 = search.ids(romania, "Oradea", "Neamt")
-    # print(path5, search.get_path_cost(romania, path5), "ids") # type: ignore
+    path5 = search.ids(romania, "Oradea", "Neamt")
+    print(path5, search.get_path_cost(romania, path5), "ids") # type: ignore
 
-    # path6 = search.bfs(romania, "Oradea", "Neamt")
-    # print(path6, search.get_path_cost(romania, path6), "bfs") # type: ignore
+    path6 = search.bfs(romania, "Oradea", "Neamt")
+    print(path6, search.get_path_cost(romania, path6), "bfs") # type: ignore
 
-    # path7 = search.greedy_search(romania, "Oradea", "Neamt")
-    # print(path7, search.get_path_cost(romania, path7), "greedy") # type: ignore
+    path7 = search.greedy_search(romania, "Oradea", "Neamt")
+    print(path7, search.get_path_cost(romania, path7), "greedy") # type: ignore
 
-    # path8 = search.dfs(romania, "Oradea", "Neamt")
-    # print(path8, search.get_path_cost(romania, path8), "bfs") # type: ignore
+    path8 = search.dfs_iterative(romania, "Oradea", "Neamt")
+    print(path8, search.get_path_cost(romania, path8), "bfs") # type: ignore
 
-    # path9 = search.dfs_iterative(romania, "Oradea", "Neamt")
-    # print(path9, search.get_path_cost(romania, path9), "dfs_iterative") # type: ignore
-
+    path9 = search.dfs_iterative(romania, "Oradea", "Neamt")
+    print(path9, search.get_path_cost(romania, path9), "dfs_iterative") # type: ignore
 

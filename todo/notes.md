@@ -21,3 +21,7 @@
     -> convert the ispnb file to a pdf with experiment results.
     -> a readme.txt with group names.
     -> 'Group-15' zip file with the pdf and code in it.
+
+
+
+- Which algorithms should ensure shortest path finding.
