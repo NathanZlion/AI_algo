@@ -329,6 +329,7 @@ class Search:
 
         return self.trace_path(goal, parent_map)
 
+
     def a_star_search(self, graph: Graph, start: str, goal: str, coordinates) -> List[str]:
         explored: Set[str] = set()
         g_cost = {node: float('inf') for node in graph.get_nodes()}
@@ -339,7 +340,6 @@ class Search:
         # create a priority queue and add the start node
         priority_queue: List[Tuple[int|float, str]] = [(0, start)]
         heapq.heapify(priority_queue)
-
 
         while priority_queue:
             current_cost, vertex = heapq.heappop(priority_queue)
@@ -389,16 +389,15 @@ class Search:
 
         return distance
 
-    def heuristics(self, city1: str, city2: str, coordinates_dict: dict[str, float]) -> int|float:
+    def heuristics(self, city1: str, city2: str, coordinates_dict: dict[str, Tuple[float, float]]) -> int|float:
 
         coordinate_1 = coordinates_dict[city1]
         coordinate_2 = coordinates_dict[city2]
 
-        return self.haversine_distance(coordinate_1, coordinate_2)
+        return Search.haversine_distance(coordinate_1, coordinate_2)
 
 
     def evaluateHeuristice(self, graph: Graph, coordinates: Dict[str, Tuple[float, float]]):
-        
         passed = 0
         total = 0
 
@@ -406,13 +405,15 @@ class Search:
             for node2 in coordinates:
                 if node1 == node2:
                     continue
+
                 search_cost = self.get_path_cost(graph, self.dijkstra_search(graph, node1, node2))
-                heuristic_cost = self.heuristics(node1, node2, coordinates)  # type: ignore
+                heuristic_cost = self.heuristics(node1, node2, coordinates) 
                 if search_cost < heuristic_cost:
                     print(f'Test {total}: {node1} => {node2}, \ndifference {heuristic_cost-search_cost}\n' )
                 else:
                     passed += 1
                 total += 1
+            
         print(f'Passed : {passed}/{total}')
         print(f'Failed : {total -passed}/{total}')
         print(f'{round(passed/total*100, 2)} % Effective Heuristics')

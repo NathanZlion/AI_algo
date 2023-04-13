@@ -8,7 +8,7 @@ class Node:
         self._neighbors: Dict['Node', int|float] = {}
 
 
-    def add_neighbor(self, neighbor: 'Node', weight = 0) -> None:
+    def add_neighbor(self, neighbor: 'Node', weight:int|float = 0) -> None:
         """Adds the neighbor node to the node's neghbors list"""
 
         self._neighbors[neighbor] = weight
@@ -47,7 +47,7 @@ class Node:
 
 
     def __str__(self) -> str:
-        return self.name + " <neighbors> : "  + str([neighbor.name for neighbor in self._neighbors.keys()])
+        return self.name + " <neighbors> : "  + str([(neighbor.name, self.get_weight(neighbor)) for neighbor in self._neighbors.keys()])
 
 class Graph:
     def __init__(self):
@@ -57,6 +57,7 @@ class Graph:
     def add_node(self, node: str) -> None:
         """Creates a new Node and adds it to the graph. It has no connections by\
             default."""
+        if node in self._nodes: return
         self._nodes[node] = Node(node)
 
 
@@ -65,7 +66,7 @@ class Graph:
         return self._nodes[node1].get_weight(self._nodes[node2])
 
 
-    def add_edge(self, node1: str, node2: str, weight=0) -> None:
+    def add_edge(self, node1: str, node2: str, weight:int|float=0) -> None:
         """Adds an edge between two nodes, and assigns a weight to the weight, \
             Weight is 0 by default."""
 
