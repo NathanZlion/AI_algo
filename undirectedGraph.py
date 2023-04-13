@@ -7,30 +7,44 @@ class Node:
         self.name: str = name
         self._neighbors: Dict['Node', int|float] = {}
 
-    def add_neighbor(self, neighbor: 'Node', weight = 0):
+
+    def add_neighbor(self, neighbor: 'Node', weight = 0) -> None:
         """Adds the neighbor node to the node's neghbors list"""
+
         self._neighbors[neighbor] = weight
+
 
     def get_neighbors(self) -> Dict['Node', int|float]:
         """This returns a dictionary with key node and value int or float, \
             which represents the weight to that node"""
+
         return self._neighbors
 
+
     def get_weight(self, neighbor: 'Node'):
+        """return the weight of edge between current node and neighbor."""
+
         return self._neighbors[neighbor] if neighbor in self._neighbors else float('inf')
 
     def number_of_edges(self):
         """returns the number of `neighbors (connections)` a node has."""
+
         return len(self._neighbors)
     
     def delete_neighbor(self, neighbor: 'Node') -> None:
         """delete a neighbor if it was indeed a neighbor."""
-        if not neighbor in self._neighbors: return
+
+        if not neighbor in self._neighbors:
+            return
+     
         del self._neighbors[neighbor]
+
 
     def is_neighbor_of(self, node: 'Node') -> bool:
         """Returns if the neighbor has a connection with this node."""
+
         return node in self._neighbors
+
 
     def __str__(self) -> str:
         return self.name + " <neighbors> : "  + str([neighbor.name for neighbor in self._neighbors.keys()])
@@ -66,6 +80,7 @@ class Graph:
     def delete_node(self, node: str) -> None:
         """Deletes a node from theis graph if it exists. It also takes care of edges \
         formed with the node by deleting any edge made with it's neighbors."""
+
         if node in self._nodes:
             del self._nodes[node]
             for n in self._nodes:
@@ -75,6 +90,7 @@ class Graph:
 
     def delete_edge(self, node1: str, node2: str) -> None:
         """Deletes an edge between node1 and node2 if there exists one."""
+
         if node1 in self._nodes and node2 in self._nodes:
             self._nodes[node1].delete_neighbor(self._nodes[node2])
             self._nodes[node2].delete_neighbor(self._nodes[node1])
@@ -82,23 +98,25 @@ class Graph:
 
     def get_node(self, name: str) -> Node:
         """returns the node with the given name that is found in this grpah."""
+
         return self._nodes[name]
 
 
-    def have_edge(self, node1: str, node2: str) -> bool:
+    def has_edge(self, node1: str, node2: str) -> bool:
         """returns True if there is an edge connecting node1 and node2 in this undirected graph."""
+
         return self._nodes[node1].is_neighbor_of(self._nodes[node2])
     
 
     def get_nodes(self) -> Dict[str, Node]:
         """returns a dictionary of all nodes in the current graph where the name of the node is the key \
             and the reference (pointer thing ...) to that node, the node it self, is the values."""
+
         return self._nodes
 
 
     def get_edges(self) -> List[Tuple[str, str, Dict[str, str|int|float]]]:
         """returns a list of edges between nodes that exist in this graph."""
-
         # ((node1, node2), `Weight`)
         weights : Dict[Tuple[str,str], int|float]= {}
 
@@ -142,7 +160,11 @@ class Graph:
         return (map_node_index, adj_matrix)
 
     def get_number_of_nodes(self) -> int:
-        """Returns the number of nodes in this graph."""
+        """Returns the number of nodes in the current graph.
+        ```
+        return self.__len__()
+        ```
+        """
         return self.__len__()
 
     def __len__(self) -> int:
@@ -151,11 +173,11 @@ class Graph:
 
 
     def __str__(self) -> str:
-        """print graph."""
+        """prints graph."""
         lst = list()
 
         for node in self._nodes.values():
             lst.append(str(node))
 
-        return str("\n-> ".join(lst))
+        return str("\n".join(lst))
 
