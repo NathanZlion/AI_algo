@@ -11,7 +11,8 @@ from math import radians, sqrt, sin, cos, atan2
 class Search:
     """ Implemented different methods to search a graph."""
 
-    def trace_path(self, goal, parent_map) -> List[str]:
+    @staticmethod
+    def trace_path(goal, parent_map) -> List[str]:
         """Traces a path to the start from the goal state and returns a list of path taken."""
         path = deque([goal])
 
@@ -20,12 +21,12 @@ class Search:
 
         return list(path)
 
-
-    def bfs(self, graph: Graph, start: str, goal:str):
+    @staticmethod
+    def bfs(graph: Graph, start: str, goal:str):
         """
         BFS : `Breadth First Search` is a graph traversal algorithm that explores the vertices of a graph\
         in breadth-first order, meaning it visits all the neighbors of a vertex before moving on to their\
-        neighbors. If there's no path between the nodes it returns ` an empty list 1[]`.
+        neighbors. If there's no path between the nodes it returns ` an empty list, []`.
         """
         explored = set()
         queue : Queue[List[str]] = Queue()
@@ -52,8 +53,8 @@ class Search:
 
         return []
 
-
-    def dfs_iterative(self, graph: Graph, start: str, goal:str):
+    @staticmethod
+    def dfs_iterative(graph: Graph, start: str, goal:str):
         """Implements a `Depth first search` for a graph and returns the path between the start\
             and goal. Returns `[] empty list` if there is no valid path."""
         explored = set()
@@ -86,8 +87,8 @@ class Search:
 
         return []
 
-
-    def dfs_recursive(self, graph: Graph, start: str, goal:str, visited=None):
+    @staticmethod
+    def dfs_recursive(graph: Graph, start: str, goal:str, visited=None):
         """Implements a `Depth first search` for a graph and returns the path between the start\
             and goal. Returns `[] empty list` if there is no valid path."""
         if visited is None:
@@ -99,7 +100,7 @@ class Search:
 
         for neighbor in graph.get_node(start).get_neighbors():
             if neighbor.name not in visited:
-                path = self.dfs_recursive(graph, neighbor.name, goal, visited)
+                path = Search.dfs_recursive(graph, neighbor.name, goal, visited)
 
                 if path is not None:
                     path.insert(0, start)
@@ -107,8 +108,8 @@ class Search:
 
         return []
 
-
-    def dijkstra_search(self, graph: Graph, start: str, goal: str) -> List[str]:
+    @staticmethod
+    def dijkstra_search(graph: Graph, start: str, goal: str) -> List[str]:
         """
             Finds the shortest path between start and goal in the graph using the dijkstra \
             searching algorithm. It works for a weighted graph too.
@@ -123,7 +124,7 @@ class Search:
             curr_dist, curr_vertex = heapq.heappop(priority_queue)
 
             if curr_vertex == goal:
-                return self.trace_path(goal, parent_map)
+                return Search.trace_path(goal, parent_map)
 
             # if a shorter path is already been explored don't discover
             if curr_dist > distances[curr_vertex] or curr_vertex in explored:
@@ -141,8 +142,8 @@ class Search:
 
         return []
 
-
-    def ucs(self, graph: Graph, start: str, goal:str) -> List[str]:
+    @staticmethod
+    def ucs(graph: Graph, start: str, goal:str) -> List[str]:
         """
         UCS: `Uniform cost first search` for a graph and returns the path between the start\
         and goal. Returns `empty list` if there is no valid path. Explores all paths.
@@ -170,8 +171,8 @@ class Search:
 
         return []
 
-
-    def dls(self, graph: Graph, start: str, goal: str, max_depth: int = 20):
+    @staticmethod
+    def dls(graph: Graph, start: str, goal: str, max_depth: int = 20):
         """
         DLS : `Depth limited search` algorithm. Returns a list path to the goal if \
         the goal is found within `max_depth` steps form the start node. returns `None` \
@@ -185,7 +186,7 @@ class Search:
             neighbors = graph.get_node(start).get_neighbors()
 
             for neighbor in neighbors:
-                result : Optional[List[str]] = self.dls(graph, neighbor.name, goal, max_depth - 1)
+                result : Optional[List[str]] = Search.dls(graph, neighbor.name, goal, max_depth - 1)
 
                 # result found, add current node at frond and return to caller.
                 if result is not None:
@@ -194,8 +195,8 @@ class Search:
 
         return None
 
-
-    def ids(self, graph: Graph, start: str, goal:str):
+    @staticmethod
+    def ids(graph: Graph, start: str, goal:str):
         """
         Uses `Iterative deepining searching` algorithm that tries depth limited search \
         for a certain depth. If goal is not found within that depth, It tries to go deeper \
@@ -204,7 +205,7 @@ class Search:
         depth = 0
 
         for _ in range(len(graph)):
-            result = self.dls(graph, start, goal, depth)
+            result = Search.dls(graph, start, goal, depth)
 
             if result: return result
 
@@ -212,15 +213,15 @@ class Search:
 
         return []
 
-
-    def get_path_cost(self, graph: Graph, path: List[str]) -> int|float:
+    @staticmethod
+    def get_path_cost(graph: Graph, path: List[str]) -> int|float:
         """Returns the cost of the path followed."""
 
         return sum([graph.get_cost(path[index], path[index+1]) \
                     for index in range(len(path)-1)])
 
-
-    def bidirectional_search(self, graph: Graph, start: str, goal: str) -> List[str]:
+    @staticmethod
+    def bidirectional_search(graph: Graph, start: str, goal: str) -> List[str]:
         """`Bidirectional search` searches for a path between start and goal. It does this by\
             starting its search from both ends. Once the two paths meet from opposite sides it \
             returns the path taken from start to end. Returns an empty list if no path exists."""
@@ -241,7 +242,7 @@ class Search:
             if start_node not in start_explored:
                 start_explored.add(start_node)
 
-                goal_path = self.bfs(graph, goal, start_node)
+                goal_path = Search.bfs(graph, goal, start_node)
 
                 if goal_path is not None:
                     goal_path.reverse()
@@ -262,7 +263,7 @@ class Search:
             if goal_node not in goal_explored:
                 goal_explored.add(goal_node)
 
-                start_path = self.bfs(graph, start, goal_node)
+                start_path = Search.bfs(graph, start, goal_node)
 
                 if start_path is not None:
                     start_path.reverse()
@@ -279,8 +280,8 @@ class Search:
 
         return []
 
-
-    def greedy_search(self, graph: Graph, start: str, goal: str):
+    @staticmethod
+    def greedy_search(graph: Graph, start: str, goal: str):
 
         parent_map = {}
         cost = {}
@@ -327,13 +328,13 @@ class Search:
                     # add the neighbor to the priority queue
                     priority_queue.put((new_cost, neighbor))
 
-        return self.trace_path(goal, parent_map)
+        return Search.trace_path(goal, parent_map)
 
-
-    def a_star_search(self, graph: Graph, start: str, goal: str, coordinates) -> List[str]:
+    @staticmethod
+    def a_star_search(graph: Graph, start: str, goal: str, coordinates) -> List[str]:
         explored: Set[str] = set()
         g_cost = {node: float('inf') for node in graph.get_nodes()}
-        heuristics = {node: self.heuristics(node, goal, coordinates) for node in graph.get_nodes()}
+        heuristics = {node: Search.heuristics(node, goal, coordinates) for node in graph.get_nodes()}
         parent: dict[str, Optional[str]] = {node: None for node in graph.get_nodes()}
         g_cost[start] = 0
 
@@ -349,7 +350,7 @@ class Search:
 
             explored.add(vertex)
             if vertex == goal:
-                return self.trace_path(goal, parent)
+                return Search.trace_path(goal, parent)
 
             # update the cost estimates of the neighbors
             vertex_node = graph.get_node(vertex)
@@ -389,7 +390,9 @@ class Search:
 
         return distance
 
-    def heuristics(self, city1: str, city2: str, coordinates_dict: dict[str, Tuple[float, float]]) -> int|float:
+
+    @staticmethod
+    def heuristics(city1: str, city2: str, coordinates_dict: dict[str, Tuple[float, float]]) -> int|float:
 
         coordinate_1 = coordinates_dict[city1]
         coordinate_2 = coordinates_dict[city2]
@@ -397,7 +400,8 @@ class Search:
         return Search.haversine_distance(coordinate_1, coordinate_2)
 
 
-    def evaluateHeuristice(self, graph: Graph, coordinates: Dict[str, Tuple[float, float]]):
+    @staticmethod
+    def evaluateHeuristice(graph: Graph, coordinates: Dict[str, Tuple[float, float]]):
         passed = 0
         total = 0
 
@@ -406,8 +410,8 @@ class Search:
                 if node1 == node2:
                     continue
 
-                search_cost = self.get_path_cost(graph, self.dijkstra_search(graph, node1, node2))
-                heuristic_cost = self.heuristics(node1, node2, coordinates) 
+                search_cost = Search.get_path_cost(graph, Search.dijkstra_search(graph, node1, node2))
+                heuristic_cost = Search.heuristics(node1, node2, coordinates) 
                 if search_cost < heuristic_cost:
                     print(f'Test {total}: {node1} => {node2}, \ndifference {heuristic_cost-search_cost}\n' )
                 else:
@@ -418,8 +422,8 @@ class Search:
         print(f'Failed : {total -passed}/{total}')
         print(f'{round(passed/total*100, 2)} % Effective Heuristics')
 
-
-    def graph_to_dict(self, graph: Graph):
+    @staticmethod
+    def graph_to_dict(graph: Graph):
         dictionary = {}
 
         for node_name,node  in graph.get_nodes().items():

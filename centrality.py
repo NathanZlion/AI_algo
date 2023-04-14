@@ -9,7 +9,9 @@ import networkx as nx
 
 
 class Centrality:
-    def degree_centrality(self, graph: Graph):
+
+    @staticmethod
+    def degree_centrality(graph: Graph):
         """ This returns the degree centrality of all nodes in the input graph."""
 
         centrality : Dict[str, float]= {}
@@ -21,7 +23,8 @@ class Centrality:
         return centrality
 
 
-    def closeness_centrality(self, graph: Graph):
+    @staticmethod
+    def closeness_centrality(graph: Graph):
         """
         For each node calculates the sum of shortest paths and averages them. \
         That gives us the closeness centrality. a higher centrality implying \
@@ -47,7 +50,8 @@ class Centrality:
         return centrality
 
 
-    def betweenness_centrality(self, graph: Graph):
+    @staticmethod
+    def betweenness_centrality(graph: Graph):
         """ 
         This returns the `betweeness centrality` of all nodes in the input graph, by calculating\
         how many shortest paths pass through the current node. The more nodes pass through it \
@@ -81,7 +85,8 @@ class Centrality:
         return dict(centrality)
 
 
-    def eigenvector_centrality(self, graph: Graph) -> Dict[str, float]:
+    @staticmethod
+    def eigenvector_centrality(graph: Graph) -> Dict[str, float]:
         """Returns the `eigen vector centrality` of nodes in the graph."""
         
         # create adjacency matrix with weights as distances
@@ -117,9 +122,12 @@ class Centrality:
 
         return res
 
-    def katz_centrality(self, graph: Graph, alpha:float|int = 0.1, max_iter: int = 100):
-        # node_to_index_map is the map to the index in row and col of adj_matrix that the node has
 
+    @staticmethod
+    def katz_centrality(graph: Graph, alpha:float|int = 0.1, max_iter: int = 100):
+        """Returns the `katz centrality` of nodes in the graph."""
+
+        # node_to_index_map is the map to the index in row and col of adj_matrix that the node has
         current_graph = nx.Graph()
         graph_edges = graph.get_inverted_edges()
         current_graph.add_edges_from(graph_edges)
@@ -128,7 +136,10 @@ class Centrality:
         return katz_centrality
 
 
-    def pagerank_centrality(self, graph: Graph, alpha= 0.85):
+    @staticmethod
+    def pagerank_centrality(graph: Graph, alpha= 0.85):
+        """Returns the `pagerank centrality` of nodes in the graph."""
+
         current_graph = nx.Graph()
         graph_edges = graph.get_inverted_edges()
         current_graph.add_edges_from(graph_edges)
