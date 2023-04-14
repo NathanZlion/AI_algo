@@ -1,5 +1,4 @@
 import random
-from typing import Dict, Tuple
 from undirectedGraph import Graph
 
 class Graph_Generator:
@@ -13,7 +12,7 @@ class Graph_Generator:
 
         # create nodes
         for i in range(number_of_nodes):
-            node_name = Graph_Generator.num_to_alpha(i)
+            node_name = Graph_Generator._num_to_alpha(i)
             resulting_graph.add_node(node_name)
 
         stop = False
@@ -43,8 +42,8 @@ class Graph_Generator:
 
     @staticmethod
     def _add_edge(graph: Graph, i: int, j: int, weight: float) -> bool:
-        first_node = Graph_Generator.num_to_alpha(i)
-        second_node = Graph_Generator.num_to_alpha(j)
+        first_node = Graph_Generator._num_to_alpha(i)
+        second_node = Graph_Generator._num_to_alpha(j)
         if graph.has_edge(first_node, second_node) or first_node==second_node:
             return False
 
@@ -53,18 +52,18 @@ class Graph_Generator:
 
 
     @staticmethod
-    def num_to_alpha(num) -> str:
-        alphabet_map = lambda num: chr(num+97)
+    def _num_to_alpha(num) -> str:
+        """
+        changes a number to a string of characters, It's technically hashing. used \
+        the concept of changing to base 26 and replacing each number to it's respective\
+        character, A being 0  ,B => 1and goes like that. 
+        """
 
         quotient = num // 26
         remainder = num % 26
         if quotient == 0:
-            return alphabet_map(remainder)
+            return chr(remainder+97)
 
-        return Graph_Generator.num_to_alpha(quotient-1) + alphabet_map(remainder)
+        return Graph_Generator._num_to_alpha(quotient-1) + chr(remainder+97)
 
 
-
-graph, coordinates = Graph_Generator.generate(5, 0.5)
-print(graph)
-print(coordinates)

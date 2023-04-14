@@ -30,16 +30,18 @@ class Experiment:
 
         search_runtime = [0.0 for _ in range(8)]
         search_solution_length = [0.0 for _ in range(8)]
-        randomlist = Experiment.take_sample(list(graph.get_nodes().keys()))
+        randomlist = Experiment._take_sample(list(graph.get_nodes().keys()))
 
         for _ in range(number_of_experiments):
             for start in randomlist:
                 for goal in randomlist:
                     if start == goal: continue
-
+                    
+                    # run all 8 searching algorithms and record their result.
                     for search_index in range(8):
                         search_algorithm = search_algorithm_name_to_function_map[search_algorithms[search_index]]
 
+                        # a star algorithm, which needs coordinates.
                         if search_index == 0:
                             start_timer = prf_ctr()
                             solution = search_algorithm(graph, start, goal, coordinates)
@@ -63,7 +65,7 @@ class Experiment:
 
 
     @staticmethod
-    def take_sample(nodes: List[str], number_of_samples = 10) -> List[str]:
+    def _take_sample(nodes: List[str], number_of_samples = 10) -> List[str]:
         randomlist = sample(nodes, number_of_samples)
 
         return randomlist
