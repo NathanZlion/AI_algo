@@ -11,13 +11,13 @@ romania_graph = Romania().get_city()
 romania_coordinates = Romania().get_coordinates()
 
 # eigenvector_centrality = center().eigenvector_centrality(romania_graph)
-katz_centrality = center().katz_centrality(romania_graph)
-# pagerank_centrality = center().pagerank_centrality(romania_graph)
+# katz_centrality = center().katz_centrality(romania_graph)
+pagerank_centrality = center().pagerank_centrality(romania_graph)
 
 centrality_list : List[Tuple[Mapping,str]] = [
         # (eigenvector_centrality, "Eigenvector"),\
-        (katz_centrality, "Katz"),\
-        # (pagerank_centrality, "PageRank")
+        # (katz_centrality, "Katz"),\
+        (pagerank_centrality, "PageRank")
     ]
 
 x_values = list(romania_graph.get_nodes())

@@ -88,6 +88,7 @@ class Centrality:
     @staticmethod
     def eigenvector_centrality(graph: Graph, max_iteration = 1000) -> Dict[str, float]:
         """Returns the `eigen vector centrality` of nodes in the graph."""
+        assert  len(graph) > 0, "The graph has no nodes, cannot calculate centrality."
 
         # create adjacency matrix with weights as distances
         adj_matrix: List[List[Union[int, float]]] = [[0 for _ in range(len(graph))] for _ in range(len(graph))]
@@ -130,7 +131,8 @@ class Centrality:
     @staticmethod
     def katz_centrality(graph: Graph, alpha: float = 39.9, beta:float=1, max_iteration: int = 1000):
         """Returns the `katz centrality` of nodes in the graph."""
-        
+        assert  len(graph) > 0, "The graph has no nodes, cannot calculate centrality."
+
         adj_matrix: List[List[Union[int, float]]] = [[0 for _ in range(len(graph))] for _ in range(len(graph))]
         node_names = list(graph.get_nodes().keys())
         node_indices = {name:index for index,name in enumerate(node_names)}
@@ -168,38 +170,44 @@ class Centrality:
 
         return res
 
-    @staticmethod
-    def pagerank_centrality(graph: Graph, alpha=0.85):
-        """Returns the `pagerank centrality` of nodes in the graph."""
-        assert  len(graph) > 0, "The graph has no nodes, cannot calculate centrality."
 
-        # create adjacency matrix with weights as distances
-        adj_matrix :List[list[int|float]] = [[0 for _ in range(len(graph))] for _ in range(len(graph))]
+    @staticmethod
+    def pagerank_centrality(graph: Graph, alpha: float = 0.85):
+        """Returns the `pagerank centrality` of nodes in the graph based on the `katz_centrality` scores."""
+        assert len(graph) > 0, "The graph has no nodes, cannot calculate centrality."
+
+        # get adjacency matrix and node names
+        adj_matrix = [[0 for _ in range(len(graph))] for _ in range(len(graph))]
         node_names = list(graph.get_nodes().keys())
         node_indices = {name:index for index,name in enumerate(node_names)}
-        convergence_threshold = 1e-5 # defining convergence threshold as a small number
-        max_iter = 100 # defining maximum number of iterations as 100
 
         edges = graph.get_edges()
         outlinks_count = [0] * len(graph)
         for edge in edges:
             source, target, weight = edge
             weight = 1/float(weight["weight"])
-            row:int = node_indices[source]
-            col:int = node_indices[target]
-            adj_matrix[row][col] = weight
+            row = node_indices[source]
+            col = node_indices[target]
+            adj_matrix[row][col] = weight # type: ignore
             outlinks_count[row] += 1
-        
-        # initialize pagerank values
-        pagerank_values = [1/len(graph)] * len(graph)
+
+        # calculate normalized Katz scores
+        katz_scores = Centrality.katz_centrality(graph)
+        katz_sum = sum(katz_scores.values())
+        normalized_katz_scores = {node: katz / katz_sum for node, katz in katz_scores.items()}
+
+        # initialize Pagerank values to normalized Katz scores
+        pagerank_values = [normalized_katz_scores[node] for node in node_names]
 
         # power iteration algorithm to calculate Pagerank
+        convergence_threshold = 1e-5 # defining convergence threshold as a small number
+        max_iter = 1000 # defining maximum number of iterations as 100
         i = 0
         while i < max_iter:
             prev_pagerank_values = pagerank_values.copy()
             for j in range(len(graph)):
                 incoming_pr = sum(adj_matrix[i][j]/outlinks_count[j]*prev_pagerank_values[j] if outlinks_count[j]*prev_pagerank_values[j] != 0 else 0 for i in range(len(graph)))
-                pagerank_values[j] = (1 - alpha) * 1/len(graph) + alpha * incoming_pr
+                pagerank_values[j] = (1 - alpha) * normalized_katz_scores[node_names[j]] + alpha * incoming_pr
             if all(abs(pagerank_values[i] - prev_pagerank_values[i]) < convergence_threshold for i in range(len(graph))):
                 break  
             i += 1
