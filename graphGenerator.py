@@ -6,14 +6,14 @@ class Graph_Generator:
 
     @staticmethod
     def generate(number_of_nodes: int, probability_of_edge: float):
-        resulting_graph : Graph = Graph()
+        graph : Graph = Graph()
         total_possible_edges = (number_of_nodes) * (number_of_nodes-1) // 2
         needed_edge_amount = round(probability_of_edge*total_possible_edges)
 
         # create nodes
         for i in range(number_of_nodes):
             node_name = Graph_Generator._num_to_alpha(i)
-            resulting_graph.add_node(node_name)
+            graph.add_node(node_name)
 
         stop = False
         for i in range(number_of_nodes - 1):
@@ -26,18 +26,18 @@ class Graph_Generator:
                     break
 
                 weight = random.uniform(0.1, 10.0)
-                if Graph_Generator._add_edge(resulting_graph, i, j, weight):
+                if Graph_Generator._add_edge(graph, i, j, weight):
                     needed_edge_amount -= 1
 
-        node_locations = {}
+        coordinates = {}
 
-        for node in resulting_graph.get_nodes():
+        for node in graph.get_nodes():
             x = random.uniform(0, 1)*10
             y = random.uniform(0, 1)*10
-            node_locations[node] = (x, y)
+            coordinates[node] = (x, y)
 
 
-        return (resulting_graph, node_locations)
+        return (graph, coordinates)
 
 
     @staticmethod
@@ -54,13 +54,14 @@ class Graph_Generator:
     @staticmethod
     def _num_to_alpha(num) -> str:
         """
-        changes a number to a string of characters, It's technically hashing. used \
+        Changes a number to a string of characters, It's technically hashing. used \
         the concept of changing to base 26 and replacing each number to it's respective\
         character, A being 0  ,B => 1and goes like that. 
         """
 
         quotient = num // 26
         remainder = num % 26
+
         if quotient == 0:
             return chr(remainder+97)
 

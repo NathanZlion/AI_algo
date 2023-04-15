@@ -41,10 +41,11 @@ class Experiment:
                     for search_index in range(8):
                         search_algorithm = search_algorithm_name_to_function_map[search_algorithms[search_index]]
 
-                        # a star algorithm, which needs coordinates.
+                        # a star algorithm, which needs coordinates, try taking the heuristics part out of the equation.
                         if search_index == 0:
+                            heuristics = Search.calculate_heuristics(graph, coordinates)
                             start_timer = prf_ctr()
-                            solution = search_algorithm(graph, start, goal, coordinates)
+                            solution = Search.a_star_search(graph, start, goal, heuristics)
                             end_timer = prf_ctr()
                             search_runtime[0] += (end_timer - start_timer)
                             search_solution_length[0] += len(solution)
@@ -69,3 +70,4 @@ class Experiment:
         randomlist = sample(nodes, number_of_samples)
 
         return randomlist
+

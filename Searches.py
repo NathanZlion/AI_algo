@@ -1,10 +1,9 @@
 
 from collections import deque
-from romaniaCity import Romania
 from queue import Queue, PriorityQueue
 import heapq
 from sys import maxsize
-from undirectedGraph import Graph, Node
+from undirectedGraph import Graph
 from typing import Dict, List, Optional, Set, Tuple
 from math import radians, sqrt, sin, cos, atan2
 
@@ -53,6 +52,7 @@ class Search:
 
         return []
 
+
     @staticmethod
     def dfs_iterative(graph: Graph, start: str, goal:str):
         """Implements a `Depth first search` for a graph and returns the path between the start\
@@ -87,6 +87,7 @@ class Search:
 
         return []
 
+
     @staticmethod
     def dfs_recursive(graph: Graph, start: str, goal:str, visited=None):
         """Implements a `Depth first search` for a graph and returns the path between the start\
@@ -107,6 +108,7 @@ class Search:
                     return path
 
         return []
+
 
     @staticmethod
     def dijkstra_search(graph: Graph, start: str, goal: str) -> List[str]:
@@ -142,6 +144,7 @@ class Search:
 
         return []
 
+
     @staticmethod
     def ucs(graph: Graph, start: str, goal:str) -> List[str]:
         """
@@ -171,6 +174,7 @@ class Search:
 
         return []
 
+
     @staticmethod
     def dls(graph: Graph, start: str, goal: str, max_depth: int = 20):
         """
@@ -195,6 +199,7 @@ class Search:
 
         return None
 
+
     @staticmethod
     def ids(graph: Graph, start: str, goal:str):
         """
@@ -213,12 +218,14 @@ class Search:
 
         return []
 
+
     @staticmethod
     def get_path_cost(graph: Graph, path: List[str]) -> int|float:
         """Returns the cost of the path followed."""
 
         return sum([graph.get_cost(path[index], path[index+1]) \
                     for index in range(len(path)-1)])
+
 
     @staticmethod
     def bidirectional_search(graph: Graph, start: str, goal: str) -> List[str]:
@@ -280,6 +287,7 @@ class Search:
 
         return []
 
+
     @staticmethod
     def greedy_search(graph: Graph, start: str, goal: str):
 
@@ -330,11 +338,12 @@ class Search:
 
         return Search.trace_path(goal, parent_map)
 
+
     @staticmethod
-    def a_star_search(graph: Graph, start: str, goal: str, coordinates) -> List[str]:
+    def a_star_search(graph: Graph, start: str, goal: str, heuristics: Dict[str, int | float]) -> List[str]:
+
         explored: Set[str] = set()
         g_cost = {node: float('inf') for node in graph.get_nodes()}
-        heuristics = {node: Search.heuristics(node, goal, coordinates) for node in graph.get_nodes()}
         parent: dict[str, Optional[str]] = {node: None for node in graph.get_nodes()}
         g_cost[start] = 0
 
@@ -364,8 +373,8 @@ class Search:
                     parent[neighbor] = vertex
                     heapq.heappush(priority_queue, (g_cost[neighbor] + 0.07*heuristics[neighbor], neighbor))
 
-
         return []
+
 
     @staticmethod
     def haversine_distance(coordinate_1, coordinate_2) -> float:
@@ -423,46 +432,13 @@ class Search:
         print(f'{round(passed/total*100, 2)} % Effective Heuristics')
 
     @staticmethod
-    def graph_to_dict(graph: Graph):
-        dictionary = {}
+    def calculate_heuristics(graph: Graph, coordinates) -> Dict[str, int | float]:
+        """calculates a heuristic for all nodes, to precalculate necessary heuristics."""
 
-        for node_name,node  in graph.get_nodes().items():
-            dictionary[node_name] = {}
-            neighbors = node.get_neighbors()
-            for neighbor in neighbors:
-                dictionary[node_name][neighbor.name] = graph.get_cost(node.name, neighbor.name)
-        
-        return dictionary
+        heuristics: Dict[str, int | float] = {}
 
+        for start in graph.get_nodes():
+            for goal in graph.get_nodes():
+                heuristics[start] = Search.heuristics(start, goal, coordinates)
 
-if __name__ == "__main__":
-    romania = Romania().get_city()
-    search = Search()
-
-    path1 = search.ucs(romania, "Oradea", "Eforie")
-    print(path1, search.get_path_cost(romania, path1), "ucs")  # type: ignore
-
-    path2 = search.dijkstra_search(romania, "Oradea", "Neamt")
-    print(path2, search.get_path_cost(romania, path2), "dijkstra") # type: ignore
-
-    path3 = search.a_star_search(romania, "Oradea", "Neamt", Romania().get_coordinates())
-    print(path3, search.get_path_cost(romania, path3), "a_star") # type: ignore
-
-    path4 = search.bidirectional_search(romania, "Oradea", "Neamt")
-    print(path4, search.get_path_cost(romania, path4), "bi-directional") # type: ignore
-
-    path5 = search.ids(romania, "Oradea", "Neamt")
-    print(path5, search.get_path_cost(romania, path5), "ids") # type: ignore
-
-    path6 = search.bfs(romania, "Oradea", "Neamt")
-    print(path6, search.get_path_cost(romania, path6), "bfs") # type: ignore
-
-    path7 = search.greedy_search(romania, "Oradea", "Neamt")
-    print(path7, search.get_path_cost(romania, path7), "greedy") # type: ignore
-
-    path8 = search.dfs_iterative(romania, "Oradea", "Neamt")
-    print(path8, search.get_path_cost(romania, path8), "bfs") # type: ignore
-
-    path9 = search.dfs_iterative(romania, "Oradea", "Neamt")
-    print(path9, search.get_path_cost(romania, path9), "dfs_iterative") # type: ignore
-
+        return heuristics
