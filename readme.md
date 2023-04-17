@@ -1,6 +1,6 @@
 # Introduction to AI - Assignment I
 
-This repository contains code for the first assignment of the Introduction to AI course at Addis Ababa University. The objectives of the assignment include becoming comfortable with graphs and their operations, being able to implement graph search algorithms, benchmarking and comparing different search algorithms, and analyzing the results to deduce important findings.
+This repository contains code for the first assignment of the `Introduction to Arteficial Intelligence` course at Addis Ababa University. The objectives of the assignment include becoming comfortable with graphs and their operations, being able to implement graph search algorithms, benchmarking and comparing different search algorithms, and analyzing the results to deduce important findings.
 
 ## Table of Contents
 
