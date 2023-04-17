@@ -1,6 +1,6 @@
 # Introduction to AI - Assignment I
 
-This repository contains code for the first assignment of the Introduction to AI course at Addis Ababa University. The objectives of the assignment include becoming comfortable with graphs and their operations, being able to implement graph search algorithms, benchmarking and comparing different search algorithms, and analyzing the results to deduce important findings.
+This repository contains code for the first assignment of the `Introduction to Arteficial Intelligence` course at Addis Ababa University. The objectives of the assignment include becoming comfortable with graphs and their operations, being able to implement graph search algorithms, benchmarking and comparing different search algorithms, and analyzing the results to deduce important findings.
 
 ## Table of Contents
 
@@ -59,3 +59,14 @@ The deliverables for this assignment include:
 
 Note: Definitions are excluded from the deliverables.
 
+## How to Run the Code
+
+- Clone this repository using `git clone https://github.com/NathanZlion/AI_algo.git`
+- Navigate to the desired directory using `cd directory_name`
+- Play with it
+___
+## Author
+- Nathnael Dereje
+
+
+- Dijkstra search, A* search (with a consistent heuristic), and bi-directional search (with a consistent heuristic) guarantee to get the best (shortest) path in an undirected weighted search.
