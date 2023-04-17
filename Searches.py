@@ -3,9 +3,10 @@ from collections import deque
 from queue import Queue, PriorityQueue
 import heapq
 from sys import maxsize
-from undirectedGraph import Graph
+from romania_city import Romania
+from undirected_graph import Graph
 from typing import Dict, List, Optional, Set, Tuple
-from math import radians, sqrt, sin, cos, atan2
+from math import asin, radians, sqrt, sin, cos, atan2
 
 class Search:
     """ Implemented different methods to search a graph."""
@@ -193,7 +194,7 @@ class Search:
                 result : Optional[List[str]] = Search.dls(graph, neighbor.name, goal, max_depth - 1)
 
                 # result found, add current node at frond and return to caller.
-                if result is not None:
+                if result:
                     result.insert(0, start)
                     return result
 
@@ -389,7 +390,8 @@ class Search:
         distance_latitude = abs(latitude_2_rad - latitude_1_rad )
         distance_longitude = abs(longitude_2_rad - longitude_1_rad)
         a = sin(distance_latitude / 2)**2 + cos(latitude_1_rad) * cos(latitude_2_rad) * sin(distance_longitude / 2)**2
-        c = 2 * atan2(sqrt(a), sqrt(1-a)) 
+        # c = 2 * atan2(sqrt(a), sqrt(1-a)) 
+        c = 2 * asin(sqrt(a))
 
         # Earth's radius in kilometers
         R = 6371
@@ -406,7 +408,7 @@ class Search:
         coordinate_1 = coordinates_dict[city1]
         coordinate_2 = coordinates_dict[city2]
 
-        return Search.haversine_distance(coordinate_1, coordinate_2)
+        return (Search.haversine_distance(coordinate_1, coordinate_2))//1.75
 
 
     @staticmethod
@@ -422,7 +424,8 @@ class Search:
                 search_cost = Search.get_path_cost(graph, Search.dijkstra_search(graph, node1, node2))
                 heuristic_cost = Search.heuristics(node1, node2, coordinates) 
                 if search_cost < heuristic_cost:
-                    print(f'Test {total}: {node1} => {node2}, \ndifference {heuristic_cost-search_cost}\n' )
+                    pass
+                    # print(f'Test {total}: {node1} => {node2}, \ndifference {heuristic_cost-search_cost}\n' )
                 else:
                     passed += 1
                 total += 1
@@ -442,3 +445,5 @@ class Search:
                 heuristics[start] = Search.heuristics(start, goal, coordinates)
 
         return heuristics
+
+

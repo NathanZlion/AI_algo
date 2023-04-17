@@ -3,7 +3,7 @@
 import numpy as np
 from Searches import Search
 from sys import maxsize
-from undirectedGraph import Graph
+from undirected_graph import Graph
 from typing import List, Dict, Union
 import networkx as nx
 
@@ -31,8 +31,6 @@ class Centrality:
         more importance and a low one implying less importance.
         """
 
-        search = Search()
-
         centrality = {}
         total_nodes = graph.get_number_of_nodes()
 
@@ -42,7 +40,7 @@ class Centrality:
         # for each node calculate the sum of shortest distance to all other nodes
         for source in graph.get_nodes():
             for destination in graph.get_nodes():
-                centrality[source] += search.get_path_cost(graph, search.dijkstra_search(graph, source, destination))
+                centrality[source] += Search.get_path_cost(graph, Search.bidirectional_search(graph, source, destination))
         
         for node in centrality:
             centrality[node] = maxsize if centrality[node] == 0 else (total_nodes-1) * (1/centrality[node])
@@ -70,7 +68,7 @@ class Centrality:
         # find every shortest path
         for i in range(n):
             for j in range(i, n):
-                paths.append(Search().dijkstra_search(graph, all_nodes[i], all_nodes[j]))
+                paths.append(Search.dijkstra_search(graph, all_nodes[i], all_nodes[j]))
 
         for path in paths:
             for index in range(1, len(path)-1):
@@ -108,7 +106,7 @@ class Centrality:
 
         # initialize eigenvector values
         ev_values = [1.0 for _ in range(graph.get_number_of_nodes())]
-        convergence_threshold = 0.0001
+        convergence_threshold = 1e-5
         
         # power iteration method to calculate Eigenvector centrality with a maximum number of iterations
         for _ in range(max_iteration):
@@ -123,13 +121,13 @@ class Centrality:
         # calculate the norm factor after convergence
         norm_factor = sum(ev_values)
 
-        res = {node: norm_factor * value if value != 0 else 0 for node, value in zip(node_names, ev_values)}
+        res = {node: norm_factor * value for node, value in zip(node_names, ev_values)}
 
         return res
 
 
     @staticmethod
-    def katz_centrality(graph: Graph, alpha: float = 39.9, beta:float=1, max_iteration: int = 1000):
+    def katz_centrality(graph: Graph, alpha: float = 0.1, beta: float = 0.8, max_iteration: int = 1000):
         """Returns the `katz centrality` of nodes in the graph."""
         assert  len(graph) > 0, "The graph has no nodes, cannot calculate centrality."
 
@@ -147,13 +145,10 @@ class Centrality:
             col = node_indices[target]
             adj_matrix[row][col] = weight
             adj_matrix[col][row] = weight
-            
-        # calculate the maximum eigenvalue of the adjacency matrix
-        max_eigenvalue = max(abs(eigenvalue) for eigenvalue in np.linalg.eigvals(adj_matrix))
 
         # initialize kv values
         kv_values = [0.0 for _ in range(graph.get_number_of_nodes())]
-        convergence_threshold = 0.001 # defining convergence threshold as a small number
+        convergence_threshold = 1e-5
         
         # power iteration method to calculate Katz centrality
         for _ in range(max_iteration):
@@ -172,7 +167,7 @@ class Centrality:
 
 
     @staticmethod
-    def pagerank_centrality(graph: Graph, alpha: float = 0.85):
+    def pagerank_centrality(graph: Graph, alpha: float = 0.1, max_iteration = 1000):
         """Returns the `pagerank centrality` of nodes in the graph based on the `katz_centrality` scores."""
         assert len(graph) > 0, "The graph has no nodes, cannot calculate centrality."
 
@@ -201,9 +196,9 @@ class Centrality:
 
         # power iteration algorithm to calculate Pagerank
         convergence_threshold = 1e-5 # defining convergence threshold as a small number
-        max_iter = 1000 # defining maximum number of iterations as 100
+
         i = 0
-        while i < max_iter:
+        while i < max_iteration:
             prev_pagerank_values = pagerank_values.copy()
             for j in range(len(graph)):
                 incoming_pr = sum(adj_matrix[i][j]/outlinks_count[j]*prev_pagerank_values[j] if outlinks_count[j]*prev_pagerank_values[j] != 0 else 0 for i in range(len(graph)))

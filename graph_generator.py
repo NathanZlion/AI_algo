@@ -1,12 +1,18 @@
 import random
-from undirectedGraph import Graph
+from typing import Dict, Tuple
+from undirected_graph import Graph
 
 class Graph_Generator:
-
+    """A module to generate a random graph."""
 
     @staticmethod
-    def generate(number_of_nodes: int, probability_of_edge: float):
-        graph : Graph = Graph()
+    def generate(number_of_nodes: int, probability_of_edge: float = 0.5) -> Tuple[Graph, Dict[str, Tuple[float, float]]]:
+        """
+        Generates graph with `number of nodes` and `probability of edge`as given in parameter.
+        Also assigned a random (x,y) coordinate value for the nodes for later use in heuristics.
+
+        """
+        graph = Graph()
         total_possible_edges = (number_of_nodes) * (number_of_nodes-1) // 2
         needed_edge_amount = round(probability_of_edge*total_possible_edges)
 
@@ -17,9 +23,6 @@ class Graph_Generator:
 
         stop = False
         for i in range(number_of_nodes - 1):
-            if stop:
-                break
-
             for j in range(i + 1, number_of_nodes):
                 if needed_edge_amount == 0:
                     stop = True
@@ -29,7 +32,10 @@ class Graph_Generator:
                 if Graph_Generator._add_edge(graph, i, j, weight):
                     needed_edge_amount -= 1
 
-        coordinates = {}
+            if stop:
+                break
+
+        coordinates : Dict[str, Tuple[float, float]] = {}
 
         for node in graph.get_nodes():
             x = random.uniform(0, 1)*10
@@ -54,9 +60,9 @@ class Graph_Generator:
     @staticmethod
     def _num_to_alpha(num) -> str:
         """
-        Changes a number to a string of characters, It's technically hashing. used \
-        the concept of changing to base 26 and replacing each number to it's respective\
-        character, A being 0  ,B => 1and goes like that. 
+        Changes a number to a unique string of characters. It's technically hashing. used \
+        the concept of changing to base 26 and replacing each number to it's respective \
+        character, `A => 0`, `B => 1` and goes like that. 
         """
 
         quotient = num // 26

@@ -1,7 +1,7 @@
 
 import re
 from typing import Dict, Tuple
-from undirectedGraph import Graph
+from undirected_graph import Graph
 
 
 class Romania:
