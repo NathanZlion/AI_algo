@@ -1,14 +1,10 @@
 
 from collections import deque
-from queue import Queue, PriorityQueue
+from queue import Queue
 import heapq
-import random
-from sys import maxsize
-from graph_generator import Graph_Generator
-from romania_city import Romania
 from undirected_graph import Graph
 from typing import Dict, List, Optional, Set, Tuple
-from math import asin, atan2, radians, sqrt, sin, cos
+from math import atan2, radians, sqrt, sin, cos
 
 class Search:
     """ Implemented different methods to search a graph."""
@@ -169,171 +165,6 @@ class Search:
 
 
     @staticmethod
-    def dls(graph: Graph, start: str, goal: str, max_depth: int = 20):
-        """
-        DLS : `Depth limited search` algorithm. Returns a list path to the goal if \
-        the goal is found within `max_depth` steps form the start node. returns `None` \
-        if a valid path is inexistent within the specified `max_depth`.
-        """ 
-    
-        if max_depth == 0 and start == goal:
-            return [start]
-
-        if max_depth > 0:
-            neighbors = graph.get_node(start).get_neighbors()
-
-            for neighbor in neighbors:
-                result : Optional[List[str]] = Search.dls(graph, neighbor.name, goal, max_depth - 1)
-
-                # result found, add current node at frond and return to caller.
-                if result:
-                    result.insert(0, start)
-                    return result
-
-        return None
-
-
-    @staticmethod
-    def ids(graph: Graph, start: str, goal:str):
-        """
-        Uses `Iterative deepining searching` algorithm that tries depth limited search \
-        for a certain depth. If goal is not found within that depth, It tries to go deeper \
-        one more depth and search again.
-        """
-        depth = 0
-
-        for _ in range(len(graph)):
-            result = Search.dls(graph, start, goal, depth)
-
-            if result: return result
-
-            depth += 1
-
-        return []
-
-
-    @staticmethod
-    def get_path_cost(graph: Graph, path: List[str]) -> int|float:
-        """Returns the cost of the path followed."""
-
-        return sum([graph.get_cost(path[index], path[index+1]) \
-                    for index in range(len(path)-1)])
-
-
-    @staticmethod
-    def bidirectional_search(graph: Graph, start: str, goal: str) -> List[str]:
-        """`Bidirectional search` searches for a path between start and goal. It does this by\
-            starting its search from both ends. Once the two paths meet from opposite sides it \
-            returns the path taken from start to end. Returns an empty list if no path exists."""
-
-        start_queue = Queue()
-        start_queue.put([start])
-
-        goal_queue = Queue()
-        goal_queue.put([goal])
-
-        start_explored = set()
-        goal_explored = set()
-
-        while not start_queue.empty() and not goal_queue.empty():
-            start_path = start_queue.get()
-            start_node = start_path[-1]
-
-            if start_node not in start_explored:
-                start_explored.add(start_node)
-
-                goal_path = Search.bfs(graph, goal, start_node)
-
-                if goal_path is not None:
-                    goal_path.reverse()
-                    start_path.extend(goal_path[1:])
-                    return start_path
-
-                neighbors = graph.get_node(start_node).get_neighbors()
-
-                for neighbor in neighbors:
-                    if neighbor.name not in start_explored:
-                        new_path = list(start_path)
-                        new_path.append(neighbor.name)
-                        start_queue.put(new_path)
-
-            goal_path = goal_queue.get()
-            goal_node = goal_path[-1]
-
-            if goal_node not in goal_explored:
-                goal_explored.add(goal_node)
-
-                start_path = Search.bfs(graph, start, goal_node)
-
-                if start_path is not None:
-                    start_path.reverse()
-                    goal_path.extend(start_path[1:])
-                    return goal_path
-
-                neighbors = graph.get_node(goal_node).get_neighbors()
-
-                for neighbor in neighbors:
-                    if neighbor.name not in goal_explored:
-                        new_path = list(goal_path)
-                        new_path.append(neighbor.name)
-                        goal_queue.put(new_path)
-
-        return []
-
-
-    @staticmethod
-    def greedy_search(graph: Graph, start: str, goal: str):
-        """returns the path between goal and start in the graph using the greedy search algorithm."""
-
-        parent_map = {}
-        cost = {}
-        explored = {}
-
-        for node in graph.get_nodes():
-            cost[node] = maxsize
-            parent_map[node] = None
-            explored[node] = False
-
-        # assign zero cost for the start node
-        cost[start] = 0
-
-        # create a priority queue and add the start node
-        priority_queue = PriorityQueue()
-        priority_queue.put((0, start))
-
-        while not priority_queue.empty():
-            # get the minimum cost node from the priority queue
-            current_cost, vertex = priority_queue.get()
-
-            # mark the node as explored
-            explored[vertex] = True
-
-            vertex_node = graph.get_node(vertex)
-
-            # if we have reached the goal node, stop the search immediately (greedily)
-            if explored[goal]:
-                break
-
-            # update the cost estimates of the neighbors
-            for neighbor in vertex_node.get_neighbors():
-                neighbor = neighbor.name
-                neighbor_node = graph.get_node(neighbor)
-
-                # calculate the new cost estimate
-                new_cost = current_cost + vertex_node.get_weight(neighbor_node)
-
-                # if the new cost estimate is better than the current estimate, update it
-                if new_cost < cost[neighbor]:
-                    cost[neighbor] = new_cost
-                    parent_map[neighbor] = vertex
-
-                    # add the neighbor to the priority queue
-                    priority_queue.put((new_cost, neighbor))
-
-        return Search.__trace_path(goal, parent_map)
-
-
-    @staticmethod
     def a_star_search(graph: Graph, start: str, goal: str, heuristics: Dict[str, int | float]) -> List[str]:
         """returns the path between goal and start in the graph using the a* search algorithm.
         uses the heuristic input given for heuristics.
@@ -373,6 +204,13 @@ class Search:
 
         return []
 
+    @staticmethod
+    def get_path_cost(graph: Graph, path: List[str]) -> int|float:
+        """Returns the cost of the path followed."""
+
+        return sum([graph.get_cost(path[index], path[index+1]) \
+                    for index in range(len(path)-1)])
+
 
     @staticmethod
     def __haversine_distance(coordinate_1, coordinate_2) -> float:
@@ -403,15 +241,6 @@ class Search:
 
 
     @staticmethod
-    def __heuristics(city1: str, city2: str, coordinates_dict: dict[str, Tuple[float, float]]) -> int|float:
-
-        coordinate_1 = coordinates_dict[city1]
-        coordinate_2 = coordinates_dict[city2]
-
-        return Search.__haversine_distance(coordinate_1, coordinate_2)
-
-
-    @staticmethod
     def __trace_path(goal, parent_map) -> List[str]:
         """Traces a path to the start from the goal state and returns a list of path taken."""
         path = deque([goal])
@@ -420,6 +249,15 @@ class Search:
             path.appendleft(parent_map[path[0]])
 
         return list(path)
+
+
+    @staticmethod
+    def __heuristics(city1: str, city2: str, coordinates_dict: dict[str, Tuple[float, float]]) -> int|float:
+
+        coordinate_1 = coordinates_dict[city1]
+        coordinate_2 = coordinates_dict[city2]
+
+        return Search.__haversine_distance(coordinate_1, coordinate_2)
 
 
     @staticmethod
@@ -433,62 +271,3 @@ class Search:
                 heuristics[start] = Search.__heuristics(start, goal, coordinates)
 
         return heuristics
-
-
-    #########################
-    # these are extra methods used to evaluate the above methods.
-    #########################
-
-    @staticmethod
-    def evaluateHeuristice(graph: Graph, coordinates: Dict[str, Tuple[float, float]]):
-        """
-        Evaluates the effectiveness of the heuristics, that it doesn't overestimate the cost of path between all all nodes.
-        That is all estimate heuristics are <= the distance of path on graph.
-        """
-        passed = 0
-        total = 0
-
-        for node1 in coordinates:
-            for node2 in coordinates:
-                if node1 == node2:
-                    continue
-
-                search_cost = Search.get_path_cost(graph, Search.dijkstra_search(graph, node1, node2))
-                heuristic_cost = Search.__heuristics(node1, node2, coordinates) 
-                if search_cost < heuristic_cost:
-                    # pass
-                    print(f'Test {total}: {node1} => {node2}, \ndifference {heuristic_cost-search_cost}\n' )
-                else:
-                    passed += 1
-                total += 1
-            
-        print(f'Passed : {passed}/{total}')
-        print(f'Failed : {total -passed}/{total}')
-        print(f'{round(passed/total*100, 2)} % Effective Heuristics')
-
-
-    @staticmethod
-    def astar_evalution(graph, coordinates):
-        """check if a star is really getting an optimal solution."""
-        passed = 0
-        total = 0
-        heuristics = Search.calculate_heuristics(graph, coordinates)
-
-        for node1 in coordinates:
-            for node2 in coordinates:
-                if node1 == node2:
-                    continue
-
-                dijkstra_search_cost = Search.get_path_cost(graph, Search.dijkstra_search(graph, node1, node2))
-                a_star_search_cost = Search.get_path_cost(graph, Search.a_star_search(graph, node1, node2, heuristics))
-
-                if dijkstra_search_cost < a_star_search_cost:
-                    print(f'Test {total+1}: {node1} => {node2}, \n' )
-                else:
-                    passed += 1
-                total += 1
-            
-        print(f'Passed : {passed}/{total}')
-        print(f'Failed : {total -passed}/{total}')
-        print(f'>>> {round(passed/total*100, 2)} % Effective Heuristics ___ ')
-
