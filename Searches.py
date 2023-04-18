@@ -170,6 +170,67 @@ class Search:
 
         return []
 
+
+    @staticmethod
+    def bidirectional_search(graph: Graph, start: str, goal: str) -> List[str]:
+        """`Bidirectional search` searches for a path between start and goal. It does this by\
+            starting its search from both ends. Once the two paths meet from opposite sides it \
+            returns the path taken from start to end. Returns an empty list if no path exists."""
+
+        start_queue = Queue()
+        start_queue.put([start])
+
+        goal_queue = Queue()
+        goal_queue.put([goal])
+
+        start_explored = set()
+        goal_explored = set()
+
+        while not start_queue.empty() and not goal_queue.empty():
+            start_path = start_queue.get()
+            start_node = start_path[-1]
+
+            if start_node not in start_explored:
+                start_explored.add(start_node)
+
+                goal_path = Search.bfs(graph, goal, start_node)
+
+                if goal_path is not None:
+                    goal_path.reverse()
+                    start_path.extend(goal_path[1:])
+                    return start_path
+
+                neighbors = graph.get_node(start_node).get_neighbors()
+
+                for neighbor in neighbors:
+                    if neighbor.name not in start_explored:
+                        new_path = list(start_path)
+                        new_path.append(neighbor.name)
+                        start_queue.put(new_path)
+
+            goal_path = goal_queue.get()
+            goal_node = goal_path[-1]
+
+            if goal_node not in goal_explored:
+                goal_explored.add(goal_node)
+
+                start_path = Search.bfs(graph, start, goal_node)
+
+                if start_path is not None:
+                    start_path.reverse()
+                    goal_path.extend(start_path[1:])
+                    return goal_path
+
+                neighbors = graph.get_node(goal_node).get_neighbors()
+
+                for neighbor in neighbors:
+                    if neighbor.name not in goal_explored:
+                        new_path = list(goal_path)
+                        new_path.append(neighbor.name)
+                        goal_queue.put(new_path)
+
+        return []
+
     @staticmethod
     def get_path_cost(graph: Graph, path: List[str]) -> int|float:
         """Returns the cost of the path followed."""
