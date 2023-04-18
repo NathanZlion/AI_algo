@@ -1,14 +1,13 @@
 
 from random import sample
 from typing import List
-from Searches import Search
 from romania_city import Romania
+from searches import Search
 from undirected_graph import Graph
 from time import perf_counter as prf_ctr
 
 
 class Experiment:
-
 
     @staticmethod
     def run(graph: Graph, coordinates, number_of_experiments: int = 10):
@@ -17,7 +16,7 @@ class Experiment:
         search_algorithm_names = ["a_star", "breadth_first_search", "bidirectional_search", "dijkstra_search", \
             "uniform_cost_search", "iterative_deepening_search", "depth_first_search", "greedy_search"]
 
-        search_algorithm = {
+        search_algorithm_name_to_func = {
             "a_star": Search.a_star_search,
             "breadth_first_search": Search.bfs,
             "bidirectional_search": Search.bidirectional_search,
@@ -30,7 +29,7 @@ class Experiment:
 
         search_runtime = [0.0 for _ in range(8)]
         search_solution_length = [0.0 for _ in range(8)]
-        randomlist = Experiment._take_sample(list(graph.get_nodes().keys()))
+        randomlist = Experiment.__take_sample(list(graph.get_nodes().keys()))
 
         for _ in range(number_of_experiments):
             for start in randomlist:
@@ -39,7 +38,7 @@ class Experiment:
                     
                     # run all 8 searching algorithms and record their result.
                     for search_index in range(8):
-                        search_algorithm = search_algorithm[search_algorithm_names[search_index]]
+                        search_algorithm = search_algorithm_name_to_func[search_algorithm_names[search_index]]
 
                         # a star algorithm, which needs coordinates, try taking the heuristics part out of the equation.
                         if search_index == 0:
@@ -66,7 +65,7 @@ class Experiment:
 
 
     @staticmethod
-    def _take_sample(nodes: List[str], number_of_samples = 10) -> List[str]:
+    def __take_sample(nodes: List[str], number_of_samples = 10) -> List[str]:
         randomlist = sample(nodes, number_of_samples)
 
         return randomlist

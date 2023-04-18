@@ -1,0 +1,9 @@
+
+# Ignore the extras folder
+extras/
+
+# Ignore the .vscode folder
+.vscode/
+
+# Ignore the __pycache__ folder
+__pycache__/

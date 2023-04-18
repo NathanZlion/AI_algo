@@ -1,14 +1,27 @@
 
 
-import numpy as np
-from Searches import Search
 from sys import maxsize
 from undirected_graph import Graph
 from typing import List, Dict, Union
-import networkx as nx
+from searches import Search
 
 
 class Centrality:
+    """
+    Centrality
+    ---
+    A class that has implements different centrality algorithms for graph nodes.
+
+    Methods:
+        - `degree_centrality(graph: Graph)`: calculates degree centrality for nodes in the graph.
+        - `closeness_centrality(graph: Graph)`: calculates closeness centrality for nodes in the graph.
+        - `betweenness_centrality(graph: Graph)`: calculates betweeness centrality for nodes in the graph.
+        - `eigenvector_centrality(graph: Graph, max_iteration = 1000)`: calculates eigenvector centrality for nodes in the graph.
+        - `katz_centrality(graph: Graph, alpha: float = 0.1, beta: float = 0.8, max_iteration: int = 1000)`: calculates katz centrality for nodes in the graph.
+        - `pagerank_centrality(graph: Graph, alpha: float = 0.1, max_iteration = 1000)`: calculates pagerank centrality for nodes in the graph.
+
+    """
+
 
     @staticmethod
     def degree_centrality(graph: Graph):
@@ -56,7 +69,7 @@ class Centrality:
         the more important (central) it will be.
         """
 
-        n = len(graph)
+        n = graph.get_number_of_nodes()
         paths = []
         centrality = {}
 
@@ -86,10 +99,10 @@ class Centrality:
     @staticmethod
     def eigenvector_centrality(graph: Graph, max_iteration = 1000) -> Dict[str, float]:
         """Returns the `eigen vector centrality` of nodes in the graph."""
-        assert  len(graph) > 0, "The graph has no nodes, cannot calculate centrality."
+        number_of_nodes = graph.get_number_of_nodes()
 
         # create adjacency matrix with weights as distances
-        adj_matrix: List[List[Union[int, float]]] = [[0 for _ in range(len(graph))] for _ in range(len(graph))]
+        adj_matrix: List[List[Union[int, float]]] = [[0 for _ in range(number_of_nodes)] for _ in range(number_of_nodes)]
         node_names = list(graph.get_nodes().keys())
         node_indices = {name:index for index,name in enumerate(node_names)}
 
@@ -129,9 +142,10 @@ class Centrality:
     @staticmethod
     def katz_centrality(graph: Graph, alpha: float = 0.1, beta: float = 0.8, max_iteration: int = 1000):
         """Returns the `katz centrality` of nodes in the graph."""
-        assert  len(graph) > 0, "The graph has no nodes, cannot calculate centrality."
 
-        adj_matrix: List[List[Union[int, float]]] = [[0 for _ in range(len(graph))] for _ in range(len(graph))]
+        number_of_nodes = graph.get_number_of_nodes()
+
+        adj_matrix: List[List[Union[int, float]]] = [[0 for _ in range(number_of_nodes)] for _ in range(number_of_nodes)]
         node_names = list(graph.get_nodes().keys())
         node_indices = {name:index for index,name in enumerate(node_names)}
 
@@ -163,21 +177,22 @@ class Centrality:
         
         res = {node: value for node, value in zip(node_names, kv_values)}
 
+
         return res
 
 
     @staticmethod
     def pagerank_centrality(graph: Graph, alpha: float = 0.1, max_iteration = 1000):
         """Returns the `pagerank centrality` of nodes in the graph based on the `katz_centrality` scores."""
-        assert len(graph) > 0, "The graph has no nodes, cannot calculate centrality."
+        number_of_nodes = graph.get_number_of_nodes()
 
         # get adjacency matrix and node names
-        adj_matrix = [[0 for _ in range(len(graph))] for _ in range(len(graph))]
+        adj_matrix = [[0 for _ in range(number_of_nodes)] for _ in range(number_of_nodes)]
         node_names = list(graph.get_nodes().keys())
         node_indices = {name:index for index,name in enumerate(node_names)}
 
         edges = graph.get_edges()
-        outlinks_count = [0] * len(graph)
+        outlinks_count = [0] * number_of_nodes
         for edge in edges:
             source, target, weight = edge
             weight = 1/float(weight["weight"])
@@ -200,13 +215,15 @@ class Centrality:
         i = 0
         while i < max_iteration:
             prev_pagerank_values = pagerank_values.copy()
-            for j in range(len(graph)):
-                incoming_pr = sum(adj_matrix[i][j]/outlinks_count[j]*prev_pagerank_values[j] if outlinks_count[j]*prev_pagerank_values[j] != 0 else 0 for i in range(len(graph)))
+            for j in range(number_of_nodes):
+                incoming_pr = sum(adj_matrix[i][j]/outlinks_count[j]*prev_pagerank_values[j] if outlinks_count[j]*prev_pagerank_values[j] != 0 else 0 for i in range(number_of_nodes))
                 pagerank_values[j] = (1 - alpha) * normalized_katz_scores[node_names[j]] + alpha * incoming_pr
-            if all(abs(pagerank_values[i] - prev_pagerank_values[i]) < convergence_threshold for i in range(len(graph))):
+            if all(abs(pagerank_values[i] - prev_pagerank_values[i]) < convergence_threshold for i in range(number_of_nodes)):
                 break  
             i += 1
 
         res = {node: value for node, value in zip(node_names, pagerank_values)}
 
+
         return res
+

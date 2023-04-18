@@ -6,20 +6,10 @@ from sys import maxsize
 from romania_city import Romania
 from undirected_graph import Graph
 from typing import Dict, List, Optional, Set, Tuple
-from math import asin, radians, sqrt, sin, cos, atan2
+from math import asin, atan2, radians, sqrt, sin, cos
 
 class Search:
     """ Implemented different methods to search a graph."""
-
-    @staticmethod
-    def trace_path(goal, parent_map) -> List[str]:
-        """Traces a path to the start from the goal state and returns a list of path taken."""
-        path = deque([goal])
-
-        while parent_map[path[0]]:
-            path.appendleft(parent_map[path[0]])
-
-        return list(path)
 
     @staticmethod
     def bfs(graph: Graph, start: str, goal:str):
@@ -127,7 +117,7 @@ class Search:
             curr_dist, curr_vertex = heapq.heappop(priority_queue)
 
             if curr_vertex == goal:
-                return Search.trace_path(goal, parent_map)
+                return Search.__trace_path(goal, parent_map)
 
             # if a shorter path is already been explored don't discover
             if curr_dist > distances[curr_vertex] or curr_vertex in explored:
@@ -291,6 +281,7 @@ class Search:
 
     @staticmethod
     def greedy_search(graph: Graph, start: str, goal: str):
+        """returns the path between goal and start in the graph using the greedy search algorithm."""
 
         parent_map = {}
         cost = {}
@@ -337,11 +328,15 @@ class Search:
                     # add the neighbor to the priority queue
                     priority_queue.put((new_cost, neighbor))
 
-        return Search.trace_path(goal, parent_map)
+        return Search.__trace_path(goal, parent_map)
 
 
     @staticmethod
     def a_star_search(graph: Graph, start: str, goal: str, heuristics: Dict[str, int | float]) -> List[str]:
+        """returns the path between goal and start in the graph using the a* search algorithm.
+        uses the heuristic input given for heuristics.
+
+        """
 
         explored: Set[str] = set()
         g_cost = {node: float('inf') for node in graph.get_nodes()}
@@ -360,7 +355,7 @@ class Search:
 
             explored.add(vertex)
             if vertex == goal:
-                return Search.trace_path(goal, parent)
+                return Search.__trace_path(goal, parent)
 
             # update the cost estimates of the neighbors
             vertex_node = graph.get_node(vertex)
@@ -378,7 +373,9 @@ class Search:
 
 
     @staticmethod
-    def haversine_distance(coordinate_1, coordinate_2) -> float:
+    def __haversine_distance(coordinate_1, coordinate_2) -> float:
+        """returns the distance between 2 coordinates on the earth's surface in `miles`."""
+
         latitude_1, longitude_1 = coordinate_1
         latitude_2, longitude_2 = coordinate_2
 
@@ -390,25 +387,37 @@ class Search:
         distance_latitude = abs(latitude_2_rad - latitude_1_rad )
         distance_longitude = abs(longitude_2_rad - longitude_1_rad)
         a = sin(distance_latitude / 2)**2 + cos(latitude_1_rad) * cos(latitude_2_rad) * sin(distance_longitude / 2)**2
-        # c = 2 * atan2(sqrt(a), sqrt(1-a)) 
-        c = 2 * asin(sqrt(a))
+        distance_on_sphere = 2 * atan2(sqrt(a), sqrt(1-a)) 
 
         # Earth's radius in kilometers
-        R = 6371
+        RADIUS_OF_EARTH = 6371
 
-        # Distance in kilometers
-        distance = R * c
+        distance_in_km = RADIUS_OF_EARTH * distance_on_sphere
 
-        return distance
+        MILES_IN_KILOMETER = 0.614
+        distance_in_mile = distance_in_km * MILES_IN_KILOMETER
+
+        return distance_in_mile
 
 
     @staticmethod
-    def heuristics(city1: str, city2: str, coordinates_dict: dict[str, Tuple[float, float]]) -> int|float:
+    def __heuristics(city1: str, city2: str, coordinates_dict: dict[str, Tuple[float, float]]) -> int|float:
 
         coordinate_1 = coordinates_dict[city1]
         coordinate_2 = coordinates_dict[city2]
 
-        return (Search.haversine_distance(coordinate_1, coordinate_2))//1.75
+        return Search.__haversine_distance(coordinate_1, coordinate_2)
+
+
+    @staticmethod
+    def __trace_path(goal, parent_map) -> List[str]:
+        """Traces a path to the start from the goal state and returns a list of path taken."""
+        path = deque([goal])
+
+        while parent_map[path[0]]:
+            path.appendleft(parent_map[path[0]])
+
+        return list(path)
 
 
     @staticmethod
@@ -422,10 +431,10 @@ class Search:
                     continue
 
                 search_cost = Search.get_path_cost(graph, Search.dijkstra_search(graph, node1, node2))
-                heuristic_cost = Search.heuristics(node1, node2, coordinates) 
+                heuristic_cost = Search.__heuristics(node1, node2, coordinates) 
                 if search_cost < heuristic_cost:
-                    pass
-                    # print(f'Test {total}: {node1} => {node2}, \ndifference {heuristic_cost-search_cost}\n' )
+                    # pass
+                    print(f'Test {total}: {node1} => {node2}, \ndifference {heuristic_cost-search_cost}\n' )
                 else:
                     passed += 1
                 total += 1
@@ -442,8 +451,9 @@ class Search:
 
         for start in graph.get_nodes():
             for goal in graph.get_nodes():
-                heuristics[start] = Search.heuristics(start, goal, coordinates)
+                heuristics[start] = Search.__heuristics(start, goal, coordinates)
 
         return heuristics
 
 
+Search.evaluateHeuristice(Romania().get_city(), Romania().get_coordinates())

@@ -38,6 +38,8 @@ class Romania:
 
     def get_coordinates(self) -> Dict[str, Tuple[float, float]] :
         romania_coordinates : dict[str, Tuple[float, float]] = {}
+
+        # reading the coordinates from coordinates.txt file `
         with open("coordinates.txt", "r") as ef:
                 for edges in ef:
                     edges_content = re.split('[:\n]', edges)

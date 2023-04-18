@@ -3,7 +3,16 @@ from typing import Dict, Tuple
 from undirected_graph import Graph
 
 class Graph_Generator:
-    """A module to generate a random graph."""
+    """A module to generate a random graph.
+    ---
+    Methods:
+        - `generate(number_of_nodes: int, probability_of_edge: float = 0.5)` : generates a graph randomly and returns it and it's coordinate.
+                - Takes as an argument the number of nodes needed and the probability of edge needed (50% default value).
+                - It generates random nodes of the given count.
+                - Then assigns random coordinates for it.
+                - returns a tuple of the graph : `Graph`, and coordinates : Dict[str, Tuple[float, float]]
+
+    """
 
     @staticmethod
     def generate(number_of_nodes: int, probability_of_edge: float = 0.5) -> Tuple[Graph, Dict[str, Tuple[float, float]]]:

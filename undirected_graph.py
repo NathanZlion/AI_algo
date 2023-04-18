@@ -1,5 +1,5 @@
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 
 class Node:
@@ -169,7 +169,11 @@ class Graph:
         return self.__len__()
 
     def __len__(self) -> int:
-        """Returns the number of nodes in this graph."""
+        """Returns the number of nodes in this graph. you can also use the method `get_number_of_nodes` to do the same thing.
+        ```
+        return len(self._nodes) # self._node is the dictionary the has the nodes' names and reference.
+        ```
+        """
         return len(self._nodes)
 
 
