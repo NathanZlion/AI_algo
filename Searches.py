@@ -1,7 +1,8 @@
 
 from collections import deque
-from queue import Queue
+from queue import PriorityQueue, Queue
 import heapq
+from sys import maxsize
 from undirected_graph import Graph
 from typing import Dict, List, Optional, Set, Tuple
 from math import atan2, radians, sqrt, sin, cos
@@ -95,41 +96,6 @@ class Search:
                 if path:
                     path.insert(0, start)
                     return path
-
-        return []
-
-
-    @staticmethod
-    def dijkstra_search(graph: Graph, start: str, goal: str) -> List[str]:
-        """
-            Finds the shortest path between start and goal in the graph using the dijkstra \
-            searching algorithm. It works for a weighted graph too.
-        """
-        distances = {node: float('inf') for node in graph.get_nodes().keys()}
-        parent_map : Dict[str, Optional[str]] = {node: None for node in graph.get_nodes().keys()}
-        distances[start] = 0
-        priority_queue : list[tuple[int|float, str]]= [(0, start)]
-        explored : Set[str] = set()
-
-        while len(priority_queue) > 0:
-            curr_dist, curr_vertex = heapq.heappop(priority_queue)
-
-            if curr_vertex == goal:
-                return Search.__trace_path(goal, parent_map)
-
-            # if a shorter path is already been explored don't discover
-            if curr_dist > distances[curr_vertex] or curr_vertex in explored:
-                continue
-
-            for neighbor, weight in graph.get_node(curr_vertex).get_neighbors().items():
-                new_distance = curr_dist + weight
-
-                if new_distance < distances[neighbor.name]:
-                    distances[neighbor.name] = new_distance
-                    parent_map[neighbor.name] = curr_vertex
-                    heapq.heappush(priority_queue, (new_distance, neighbor.name))
-
-            explored.add(curr_vertex)
 
         return []
 

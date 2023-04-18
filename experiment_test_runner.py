@@ -8,14 +8,12 @@ from time import perf_counter
 
 
 class Experiment:
-    search_algorithm_names = ["a_star", "breadth_first_search", "dijkstra_search", \
-        "uniform_cost_search", "depth_first_search"]
+    search_algorithm_names = ["a_star", "breadth_first_search", "greedy_search", "uniform_cost_search", "depth_first_search"]
 
-
-    search_algorithm_name_to_func: Dict[str, Callable[..., List[str]]] = {
+    search_algorithm_name_to_func = {
         "a_star": Search.a_star_search,
         "breadth_first_search": Search.bfs,
-        "dijkstra_search": Search.dijkstra_search,
+        "greedy_search": Search.greedy_search,
         "uniform_cost_search": Search.ucs,
         "depth_first_search": Search.dfs_recursive,
     }
