@@ -171,7 +171,8 @@ class Graph:
     def __len__(self) -> int:
         """Returns the number of nodes in this graph. you can also use the method `get_number_of_nodes` to do the same thing.
         ```
-        return len(self._nodes) # self._node is the dictionary the has the nodes' names and reference.
+        # self._node is the mapping the has the nodes' names and reference.
+        return len(self._nodes)
         ```
         """
         return len(self._nodes)

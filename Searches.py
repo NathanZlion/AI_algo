@@ -2,7 +2,9 @@
 from collections import deque
 from queue import Queue, PriorityQueue
 import heapq
+import random
 from sys import maxsize
+from graph_generator import Graph_Generator
 from romania_city import Romania
 from undirected_graph import Graph
 from typing import Dict, List, Optional, Set, Tuple
@@ -46,7 +48,7 @@ class Search:
 
     @staticmethod
     def dfs_iterative(graph: Graph, start: str, goal:str):
-        """Implements a `Depth first search` for a graph and returns the path between the start\
+        """Implements a `Depth first search` implemented iteratively for a graph and returns the path between the start\
             and goal. Returns `[] empty list` if there is no valid path."""
         explored = set()
         stack : List[List[str]] = [[start]]
@@ -81,7 +83,7 @@ class Search:
 
     @staticmethod
     def dfs_recursive(graph: Graph, start: str, goal:str, visited=None):
-        """Implements a `Depth first search` for a graph and returns the path between the start\
+        """Implements a `Depth first search` implemented recursively for a graph and returns the path between the start\
             and goal. Returns `[] empty list` if there is no valid path."""
         if visited is None:
             visited = set()
@@ -94,7 +96,7 @@ class Search:
             if neighbor.name not in visited:
                 path = Search.dfs_recursive(graph, neighbor.name, goal, visited)
 
-                if path is not None:
+                if path:
                     path.insert(0, start)
                     return path
 
@@ -421,7 +423,28 @@ class Search:
 
 
     @staticmethod
+    def calculate_heuristics(graph: Graph, coordinates) -> Dict[str, int | float]:
+        """calculates a heuristic for all nodes, to precalculate necessary heuristics."""
+
+        heuristics: Dict[str, int | float] = {}
+
+        for start in graph.get_nodes():
+            for goal in graph.get_nodes():
+                heuristics[start] = Search.__heuristics(start, goal, coordinates)
+
+        return heuristics
+
+
+    #########################
+    # these are extra methods used to evaluate the above methods.
+    #########################
+
+    @staticmethod
     def evaluateHeuristice(graph: Graph, coordinates: Dict[str, Tuple[float, float]]):
+        """
+        Evaluates the effectiveness of the heuristics, that it doesn't overestimate the cost of path between all all nodes.
+        That is all estimate heuristics are <= the distance of path on graph.
+        """
         passed = 0
         total = 0
 
@@ -443,17 +466,29 @@ class Search:
         print(f'Failed : {total -passed}/{total}')
         print(f'{round(passed/total*100, 2)} % Effective Heuristics')
 
+
     @staticmethod
-    def calculate_heuristics(graph: Graph, coordinates) -> Dict[str, int | float]:
-        """calculates a heuristic for all nodes, to precalculate necessary heuristics."""
+    def astar_evalution(graph, coordinates):
+        """check if a star is really getting an optimal solution."""
+        passed = 0
+        total = 0
+        heuristics = Search.calculate_heuristics(graph, coordinates)
 
-        heuristics: Dict[str, int | float] = {}
+        for node1 in coordinates:
+            for node2 in coordinates:
+                if node1 == node2:
+                    continue
 
-        for start in graph.get_nodes():
-            for goal in graph.get_nodes():
-                heuristics[start] = Search.__heuristics(start, goal, coordinates)
+                dijkstra_search_cost = Search.get_path_cost(graph, Search.dijkstra_search(graph, node1, node2))
+                a_star_search_cost = Search.get_path_cost(graph, Search.a_star_search(graph, node1, node2, heuristics))
 
-        return heuristics
+                if dijkstra_search_cost < a_star_search_cost:
+                    print(f'Test {total+1}: {node1} => {node2}, \n' )
+                else:
+                    passed += 1
+                total += 1
+            
+        print(f'Passed : {passed}/{total}')
+        print(f'Failed : {total -passed}/{total}')
+        print(f'>>> {round(passed/total*100, 2)} % Effective Heuristics ___ ')
 
-
-Search.evaluateHeuristice(Romania().get_city(), Romania().get_coordinates())
