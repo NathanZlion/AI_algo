@@ -3,7 +3,7 @@
 from sys import maxsize
 from undirected_graph import Graph
 from typing import List, Dict, Union
-from searches import Search
+from Searches import Search
 
 
 class Centrality:

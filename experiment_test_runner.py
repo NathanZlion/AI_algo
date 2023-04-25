@@ -2,7 +2,7 @@
 from random import sample
 from typing import Callable, Dict, List
 from romania_city import Romania
-from searches import Search
+from Searches import Search
 from undirected_graph import Graph
 from time import perf_counter
 
