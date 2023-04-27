@@ -425,10 +425,10 @@ class Search:
     #########################
 
     @staticmethod
-    def is_admissible_heuristics(graph: Graph, coordinates: Dict[str, Tuple[float, float]]):
+    def is_consistent_heuristics(graph: Graph, coordinates: Dict[str, Tuple[float, float]]):
         """
-        Evaluates the effectiveness of the heuristics, that it doesn't overestimate the cost of path between all all nodes.
-        That is all estimate heuristics are <= the distance of path on graph.
+        Evaluates the consistency of the heuristics, that it doesn't overestimate the cost of path 
+        between all all nodes. That is all estimate heuristics are <= the distance of path on graph.
         """
         passed = 0
         total = 0
@@ -449,7 +449,34 @@ class Search:
             
         print(f'Passed : {passed}/{total}')
         print(f'Failed : {total -passed}/{total}')
-        print(f'{round(passed/total*100, 2)} % Effective Heuristics')
+        print(f'{round(passed/total*100, 2)} %  Consistent Heuristics')
+
+
+    @staticmethod
+    def is_admissible_heuristics(graph: Graph, goal: str, coordinates: Dict[str, Tuple[float, float]]):
+        """
+        Evaluates the effectiveness of the heuristics, that it doesn't overestimate the cost of path between all all nodes.
+        That is all estimate heuristics are <= the distance of path on graph.
+        """
+        passed = 0
+        total = 0
+
+        for node in coordinates:
+            if node == goal:
+                continue
+
+            search_cost = Search.get_path_cost(graph, Search.dijkstra_search(graph, node, goal))
+            heuristic_cost = Search.__heuristics(node, goal, coordinates) 
+
+            if search_cost < heuristic_cost:  # pass
+                print(f'Test {total}: {node} => {goal}, \ndifference {heuristic_cost-search_cost}\n' )
+            else:
+                passed += 1
+            total += 1
+            
+        print(f'Passed : {passed}/{total}')
+        print(f'Failed : {total -passed}/{total}')
+        print(f'{round(passed/total*100, 2)} % Admissible Heuristics for the supplied goal node')
 
 
     @staticmethod
