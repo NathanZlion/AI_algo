@@ -281,56 +281,42 @@ class Search:
 
 
     @staticmethod
-    def greedy_search(graph: Graph, start: str, goal: str):
+    def greedy_search(graph: Graph, start: str, goal: str, coordinates: dict[str, Tuple[float, float]]):
         """returns the path between goal and start in the graph using the greedy search algorithm."""
 
         parent_map = {}
-        cost = {}
-        explored = {}
-
-        for node in graph.get_nodes():
-            cost[node] = maxsize
-            parent_map[node] = None
-            explored[node] = False
-
-        # assign zero cost for the start node
-        cost[start] = 0
+        explored = set()
 
         # create a priority queue and add the start node
         priority_queue = PriorityQueue()
-        priority_queue.put((0, start))
+        priority_queue.put((Search.__heuristics(start, goal, coordinates), start)) # I have to get the coordinates of cities
 
         while not priority_queue.empty():
             # get the minimum cost node from the priority queue
-            current_cost, vertex = priority_queue.get()
+            curr_heuristics, curr_node = priority_queue.get()
 
             # mark the node as explored
-            explored[vertex] = True
+            explored.add(curr_node)
 
-            vertex_node = graph.get_node(vertex)
 
-            # if we have reached the goal node, stop the search immediately (greedily)
-            if explored[goal]:
-                break
+            # reached our goal state
+            if curr_node == goal:
+                path = deque()
+                while curr_node:
+                    path.appendleft(curr_node)
+                    curr_node = parent_map.get(curr_node)
+                
+                return list(path)
 
-            # update the cost estimates of the neighbors
-            for neighbor in vertex_node.get_neighbors():
-                neighbor = neighbor.name
-                neighbor_node = graph.get_node(neighbor)
+            for neighbor_node in graph.get_node(curr_node).get_neighbors():
+                neighbor_name = neighbor_node.name
+                if neighbor_name in explored:
+                    continue
 
-                # calculate the new cost estimate
-                new_cost = current_cost + vertex_node.get_weight(neighbor_node)
+                parent_map[neighbor_name] = curr_node
+                priority_queue.put((Search.__heuristics(neighbor_name, goal, coordinates), neighbor_name))
 
-                # if the new cost estimate is better than the current estimate, update it
-                if new_cost < cost[neighbor]:
-                    cost[neighbor] = new_cost
-                    parent_map[neighbor] = vertex
-
-                    # add the neighbor to the priority queue
-                    priority_queue.put((new_cost, neighbor))
-
-        return Search.__trace_path(goal, parent_map)
-
+        return []
 
     @staticmethod
     def a_star_search(graph: Graph, start: str, goal: str, heuristics: Dict[str, int | float]) -> List[str]:
@@ -439,7 +425,7 @@ class Search:
     #########################
 
     @staticmethod
-    def evaluateHeuristice(graph: Graph, coordinates: Dict[str, Tuple[float, float]]):
+    def is_admissible_heuristics(graph: Graph, coordinates: Dict[str, Tuple[float, float]]):
         """
         Evaluates the effectiveness of the heuristics, that it doesn't overestimate the cost of path between all all nodes.
         That is all estimate heuristics are <= the distance of path on graph.
@@ -491,3 +477,6 @@ class Search:
         print(f'Failed : {total -passed}/{total}')
         print(f'>>> {round(passed/total*100, 2)} % Effective Heuristics ___ ')
 
+
+
+print(Search.greedy_search(Romania().get_city(), "Oradea", "Craiova", Romania().get_coordinates()))
