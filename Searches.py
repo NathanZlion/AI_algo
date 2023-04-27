@@ -20,6 +20,7 @@ class Search:
         in breadth-first order, meaning it visits all the neighbors of a vertex before moving on to their\
         neighbors. If there's no path between the nodes it returns ` an empty list, []`.
         """
+
         explored = set()
         queue : Queue[List[str]] = Queue()
         queue.put([start])
@@ -200,14 +201,12 @@ class Search:
         for a certain depth. If goal is not found within that depth, It tries to go deeper \
         one more depth and search again.
         """
-        depth = 0
 
-        for _ in range(len(graph)):
+        for depth in range(len(graph)):
             result = Search.dls(graph, start, goal, depth)
 
-            if result: return result
-
-            depth += 1
+            if result:
+                return result
 
         return []
 
